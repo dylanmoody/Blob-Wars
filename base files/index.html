@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>Blobs</title>
+		<style>
+			body {
+			  overflow: hidden;
+			  margin: 0;
+			}
+			@font-face {
+			  font-family: bevan;
+			  src: url(Bevan.ttf);
+			  font-variant: italic;
+			}
+
+			button {
+				font-size: 100%;
+				border: 0;
+				padding: 10;
+				background: rgba(255,255,255,.3);
+				outline: 0;
+			}
+
+			.ui {
+			  position: absolute;
+			}
+
+			.title {
+				top:30%; 
+				right:50%; 
+				transform: translate(50%, -50%);
+				color:white;
+				font-family: bevan;
+				font-size: 60px;
+				font-style: italic;
+				border: 0;
+				padding:0;
+			}
+
+			.menu{
+				color:white;
+				font-family: bevan;
+				font-size: 45px;
+				font-style: italic;
+				border: 0;
+				padding: 0;
+				padding-right: 25px;
+				padding-left: 20px;
+				background: rgba(255,255,255,.3);
+
+			}
+
+			.main{
+				top:50%; 
+				right:50%; 
+				transform: translate(50%, -50%);
+
+			}
+
+			.play{
+				top:90%;
+				right:92%;
+				transform: translate(50%, -50%);
+			}
+
+
+		</style>
+	</head>
+	<body>
+
+
+
+
+		<script src="js/three.js"></script>
+
+
+		<script>
+			document.addEventListener('DOMContentLoaded', init, false);
+
+			// example of how to set up buttons
+
+			function playButton() {
+				// alert('hi');
+        document.getElementById("TitleMenu").style.display = "none";
+     		document.getElementById("PlayMenu").style.display = "flex";  
+
+			}
+
+			function menuButton() {
+
+        document.getElementById("TitleMenu").style.display = "flex";
+     		document.getElementById("PlayMenu").style.display = "none"; 
+			}
+
+
+			function init() {
+
+      	document.getElementById("PlayMenu").style.display = "none"; 
+
+				var scene = new THREE.Scene();
+				var sceneSize = 50;
+				var aspectRatio = window.innerWidth/window.innerHeight;
+
+				var h = sceneSize;
+				var w = sceneSize * aspectRatio;
+
+				// var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+				var camera = new THREE.OrthographicCamera( w/-2, w/2, h/2, h/-2, 0.1, 1000 );
+				var renderer = new THREE.WebGLRenderer();
+
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				document.body.appendChild(renderer.domElement);
+
+				// var light = new THREE.PointLight( 0xf0f0f0, 1, 0 );
+				// light.position.set( 0, 0, 500 );
+
+				var directionalLight = new THREE.DirectionalLight( 0xffffff, 1.5 );
+				directionalLight.position.set(0,0,1);
+				scene.add( directionalLight );
+				// scene.add( light );
+
+				/*
+
+					Define Materials 
+
+				*/
+
+
+				var materialRED = new THREE.MeshLambertMaterial({color:0x900000});
+				var materialRED_fill = new THREE.MeshStandardMaterial({color:0xff2222});
+				var materialBLUE = new THREE.MeshLambertMaterial({color:0x000090});
+				var materialBLUE_fill = new THREE.MeshStandardMaterial({color:0x2222ff});
+
+
+				var geometry = new THREE.SphereGeometry(0, 32, 32);
+				var sphere = new THREE.Mesh(geometry, materialRED);
+				sphere.scale.set(5,5,5);
+				sphere.material.opacity = .8;
+				var sphere_fill = new THREE.Mesh(geometry, materialRED_fill);
+				var sphere2 = new THREE.Mesh(geometry, materialBLUE);
+				sphere2.scale.set(5,5,5);
+				sphere.material.transparent = true;
+				scene.add(sphere,sphere_fill, sphere2);
+
+
+
+				// var material = new THREE.MeshBasicMaterial({color: 0xffff00 });
+				sphere.position.set(-15,-5,0);
+				sphere_fill.position.set(-15,-5,0);
+				sphere2.position.set(10,10,0);
+
+				camera.position.z = 50;
+
+				var movex = 0.2;
+				var movey = -0.2;
+				function animate() {
+					requestAnimationFrame( animate );
+					if(sphere.position.x < w/-2 + sphere.scale.x || sphere.position.x > w/2 - sphere.scale.x){
+						movex *= -1;
+					}
+					if(sphere.position.y < h/-2 + sphere.scale.y || sphere.position.y > h/2 - sphere.scale.y){
+						movey *= -1;
+					}
+
+					sphere.position.x += movex;
+					sphere.position.y += movey;
+
+					sphere_fill.position.x += movex;
+					sphere_fill.position.y += movey;
+
+
+					sphere2.position.x += movex;
+					sphere2.position.y += movey;
+
+					// camera.rotation.x += .01;
+					// camera.rotation.y += .01;
+
+					// sphere_fill.scale.set(sphere_fill.radius*1.01,sphere_fill.radius*1.01,sphere_fill.radius*1.01);
+
+					if(sphere_fill.scale.x < sphere.scale.x*.92){
+						sphere_fill.scale.set(sphere_fill.scale.x+0.003,sphere_fill.scale.y+0.003,sphere_fill.scale.z+0.003);
+					}
+					// camera.rotation.x += 0.1;
+					renderer.render(scene, camera);
+				}
+				animate();
+
+				}
+		</script>
+
+		<div id="TitleMenu">
+			<h1  class="ui title center">BLOB WARS </h1>
+			<input id='button' class="ui menu main" type="submit" onclick="playButton();" value="PLAY"/>
+
+
+		</div>
+
+		<div id="PlayMenu">
+			<input id='button' class="ui menu play" type="submit" onclick="menuButton();" value="MENU"/>
+			
+		</div>
+	</body>
+</html>
