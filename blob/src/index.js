@@ -19,6 +19,15 @@ let resize = require("brindille-resize");
 let OrbitControls = require("./controls/OrbitControls");
 let { gui } = require("./utils/debug");
 
+let stage = {
+    blue: {x:0.1, y:0.5, health: 100},
+    red: {x:0.9, y:0.5, health: 100},
+    blobs: [
+        {x: 0.25,y: 0.5},
+        {x: 0.75,y: 0.5},
+    ]
+}
+
 /* Custom settings */
 const SETTINGS = {
   useComposer: false,
@@ -52,7 +61,7 @@ const composer = new WAGNER.Composer(renderer);
 const bloomPass = new BloomPass();
 const fxaaPass = new FXAAPass();
 const r = new Raycaster();
-var mouse = new Vector2(0.5, 0.5),
+var mouse = new Vector2(0.5, 0.5)
   INTERSECTED;
 
 /* Main scene and camera */
@@ -153,6 +162,7 @@ function onResize() {
   renderer.setSize(resize.width, resize.height);
   composer.setSize(resize.width, resize.height);
 }
+
 
 
 function onDocumentMouseMove(event) {
