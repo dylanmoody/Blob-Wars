@@ -1,7 +1,7 @@
 let {
   WebGLRenderer,
   Scene,
-  PerspectiveCamera,
+  OrthographicCamera,
   PointLight,
   Raycaster,
   Vector2,
@@ -9,7 +9,8 @@ let {
   MeshLambertMaterial,
   MeshStandardMaterial,
   SphereGeometry,
-  Mesh
+  Mesh,
+  Group
 } = require('three')
 let loop = require("raf-loop");
 let WAGNER = require("@superguigui/wagner");
@@ -57,19 +58,24 @@ var mouse = new Vector2(0.5, 0.5),
 
 /* Main scene and camera */
 const scene = new Scene();
-const camera = new PerspectiveCamera(
-  50,
-  resize.width / resize.height,
-  0.1,
-  1000
-);
-const controls = new OrbitControls(camera, {
-  enablePan: false,
-  element: renderer.domElement,
-  parent: renderer.domElement,
-  distance: 10,
-  phi: Math.PI * 0.5
-});
+// const camera = new PerspectiveCamera(
+//   50,
+//   resize.width / resize.height,
+//   0.1,
+//   1000
+// );
+// const controls = new OrbitControls(camera, {
+//   enablePan: false,
+//   element: renderer.domElement,
+//   parent: renderer.domElement,
+//   distance: 10,
+//   phi: Math.PI * 0.5
+// });
+var sceneSize = 100;
+var aspectRatio = window.innerWidth/window.innerHeight;
+var h = sceneSize;
+var w = sceneSize * aspectRatio;
+const camera = new OrthographicCamera( w/-2, w/2, h/2, h/-2, 0.1, 1000 );
 
 /* Lights */
 const frontLight = new PointLight(0xffffff, 1);
@@ -113,7 +119,14 @@ var sphere_fill = new Mesh(geometry, materialRED_fill);
 var sphere2 = new Mesh(geometry, materialBLUE);
 sphere2.scale.set(5,5,5);
 sphere.material.transparent = true;
-scene.add(sphere,sphere_fill, sphere2);
+
+
+var group = new Group();
+group.add(sphere);
+group.add(sphere2);
+group.add(sphere_fill);
+
+scene.add(group);
 
 
 
@@ -142,6 +155,8 @@ gui.add(SETTINGS, "resetGrid");
 
 document.addEventListener("mousemove", onDocumentMouseMove, false);
 
+document.addEventListener("click", onClick, false);
+
 /* -------------------------------------------------------------------------------- */
 
 /**
@@ -149,7 +164,7 @@ document.addEventListener("mousemove", onDocumentMouseMove, false);
 */
 function onResize() {
   camera.aspect = resize.width / resize.height;
-  camera.updateProjectionMatrix();
+  // camera.updateProjectionMatrix();
   renderer.setSize(resize.width, resize.height);
   composer.setSize(resize.width, resize.height);
 }
@@ -160,10 +175,13 @@ function onDocumentMouseMove(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  controls.rotateTo(
-    Math.PI * mouse.x * 0.1,
-    Math.PI * -1 * mouse.y * 0.1 + Math.PI / 2
-  );
+
+}
+
+function onClick(event){
+  
+  group.children[0].material.color.setRGB(.5,.5,.5);
+
 }
 
 /**
@@ -171,14 +189,15 @@ function onDocumentMouseMove(event) {
 */
 function render(dt) {
   if (SETTINGS.pause) return;
-  camera.updateMatrixWorld();
-  r.setFromCamera(mouse, camera);
+  // camera.updateMatrixWorld();
+  // r.setFromCamera(mouse, camera);
 
 
   //console.log(intersections.length > 0 ? intersections : null)
   
 
-  controls.update();
+  // controls.update();
+
   if (
     sphere.position.x < 50 / -2 + sphere.scale.x ||
     sphere.position.x > 50 / 2 - sphere.scale.x
@@ -192,14 +211,12 @@ function render(dt) {
     movey *= -1;
   }
 
-  sphere.position.x += movex;
-  sphere.position.y += movey;
+  for(var i=0; i<group.children.length; i++){
+    group.children[i].position.x += movex;
+    group.children[i].position.y += movey;
 
-  sphere_fill.position.x += movex;
-  sphere_fill.position.y += movey;
+  }
 
-  sphere2.position.x += movex;
-  sphere2.position.y += movey;
 
   // camera.rotation.x += .01;
   // camera.rotation.y += .01;
