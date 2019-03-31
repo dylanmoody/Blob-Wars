@@ -172,15 +172,27 @@ function onResize() {
 
 function onDocumentMouseMove(event) {
   event.preventDefault();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
 
 }
 
 function onClick(event){
+  event.preventDefault();
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  r.setFromCamera( mouse, camera );
+
+  var intersects = r.intersectObjects( group.children );
+
+
+  for( var i = 0; i < intersects.length; i++ ) {
+    var obj = intersects[ i ].object;
+    obj.material.color.setRGB(.5,.5,.5);
+  }
+
+
   
-  group.children[0].material.color.setRGB(.5,.5,.5);
 
 }
 
@@ -212,8 +224,8 @@ function render(dt) {
   }
 
   for(var i=0; i<group.children.length; i++){
-    group.children[i].position.x += movex;
-    group.children[i].position.y += movey;
+    // group.children[i].position.x += movex;
+    // group.children[i].position.y += movey;
 
   }
 
