@@ -5,12 +5,14 @@ let {
   PointLight,
   Raycaster,
   Vector2,
+  Vector3,
   DirectionalLight,
   MeshLambertMaterial,
   MeshStandardMaterial,
   SphereGeometry,
   Mesh,
-  Group
+  Group,
+  Color
 } = require('three')
 let loop = require("raf-loop");
 let WAGNER = require("@superguigui/wagner");
@@ -39,6 +41,61 @@ function menuButton() {
   document.getElementById("TitleMenu").classList.remove('hidden')
 }
 window.menuButton = menuButton
+
+
+/*
+  
+  creating class to store the spheres here for now for convenience
+  move it later
+  
+  I also dont remember what we decided on storing inside it, so mostly temporary for now
+
+
+
+*/
+
+
+class Blob {
+
+  constructor(name, size, position, move, grow, geometry, material, opacity) {
+    this.move = move;
+    this.grow = grow;
+
+    this.sphere = new Mesh(geometry, material);
+    this.sphere.name = name;
+    this.sphere.scale.set(size.x, size.y, size.z);
+    this.sphere.position.set(position.x, position.y, position.z);
+    if (opacity){
+      this.sphere.material.transparent = true;
+      this.sphere.material.opacity = .8;  
+    }
+
+  }
+
+  getSphere() {
+    return this.sphere;
+  }
+
+  updateScale() {
+    //change the 5 to actually access the parent size
+    if (this.sphere.scale.x < 5 * 0.92) {
+      this.sphere.scale.set(
+        this.sphere.scale.x + this.grow.x,
+        this.sphere.scale.y + this.grow.y,
+        this.sphere.scale.z + this.grow.z
+      );
+    }
+
+  }
+ 
+  sayHi() {
+    console.log(this.sphere.position);
+  }
+
+}
+
+
+
 
 /* Init renderer and canvas */
 const container = document.body;
@@ -71,6 +128,8 @@ const scene = new Scene();
 //   distance: 10,
 //   phi: Math.PI * 0.5
 // });
+
+var selected;
 var sceneSize = 100;
 var aspectRatio = window.innerWidth/window.innerHeight;
 var h = sceneSize;
@@ -110,36 +169,52 @@ var materialRED_fill = new MeshStandardMaterial({color:0xff2222});
 var materialBLUE = new MeshLambertMaterial({color:0x0000ff});
 var materialBLUE_fill = new MeshStandardMaterial({color:0x3333ff});
 
+var colorSEL = new Color(0x3f3f3f);
+
 
 var geometry = new SphereGeometry(0, 32, 32);
-var sphere = new Mesh(geometry, materialRED);
-sphere.scale.set(5,5,5);
-sphere.material.opacity = .8;
-var sphere_fill = new Mesh(geometry, materialRED_fill);
-var sphere2 = new Mesh(geometry, materialBLUE);
-sphere2.scale.set(5,5,5);
-sphere.material.transparent = true;
+
+//name, size, position, move, grow, geometry, material
+var blob = new Blob("main1", new Vector3(5,5,5), new Vector3(-15,-5,0), new Vector2(0,0), 
+  new Vector3(0,0,0), geometry, materialRED, true);
 
 
-var group = new Group();
-group.add(sphere);
-group.add(sphere2);
-group.add(sphere_fill);
-
-scene.add(group);
+var blob2 = new Blob("main2", new Vector3(5,5,5), new Vector3(10,10,0), new Vector2(0,0), 
+  new Vector3(0,0,0), geometry, materialBLUE, true);
 
 
+var blobFill = new Blob("fill1", new Vector3(.1,.1,.1), new Vector3(-15,-5,0), new Vector2(0,0), 
+  new Vector3(.005,.005,.005), geometry, materialRED_fill, false);
 
-// var material = new THREE.MeshBasicMaterial({color: 0xffff00 });
-sphere.position.set(-15,-5,0);
-sphere_fill.position.set(-15,-5,0);
-sphere2.position.set(10,10,0);
+
+// ADD MAIN BLOBS 
+var mainBlobs = [];
+mainBlobs.push(blob);
+mainBlobs.push(blob2);
+
+var mainBlobGroup = new Group();
+mainBlobGroup.add(blob.getSphere());
+mainBlobGroup.add(blob2.getSphere());
+
+// ADD FILL BLOBS
+var fillBlobs = [];
+fillBlobs.push(blobFill);
+
+scene.add(mainBlobGroup);
+
+for(var i=0; i<fillBlobs.length; i++){
+  scene.add(fillBlobs[i].getSphere());
+}
+
+
+// CREATE ARRAY OF ATTACKING GROUPS AND ADD THEM ALL
+var attacks = [new Group()];
+// NEEDS A FOR LOOP
+scene.add(attacks[0]);
+
 
 camera.position.z = 50;
 
-var movex = 0.2;
-var movey = -0.2;
-//scene.add(torus)
 
 /* Various event listeners */
 resize.addListener(onResize);
@@ -173,26 +248,52 @@ function onResize() {
 function onDocumentMouseMove(event) {
   event.preventDefault();
 
-}
-
-function onClick(event){
-  event.preventDefault();
-
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+}
+
+function onClick(event){
+
   r.setFromCamera( mouse, camera );
+  var intersects = r.intersectObjects( mainBlobGroup.children );
 
-  var intersects = r.intersectObjects( group.children );
+  console.log(intersects);
+
+  if(intersects.length === 0 && selected !== undefined){
+    selected.material.color.sub(colorSEL);
+    selected = undefined;
+  } 
+  else {
+
+    for( var i = 0; i < intersects.length; i++ ) {
+      var obj = intersects[ i ].object;
+      if (selected !== undefined){
+        selected.material.color.sub(colorSEL);
+
+        selected = undefined;
+        attacks[0].add(new Mesh(geometry, materialRED));
+        attacks[0].children[0].scale.set(
+          fillBlobs[0].getSphere().scale.x * .75,
+          fillBlobs[0].getSphere().scale.y * .75,
+          fillBlobs[0].getSphere().scale.z * .75 )
+        attacks[0].children[0].position.set(
+          fillBlobs[0].getSphere().position.x,
+          fillBlobs[0].getSphere().position.y,
+          fillBlobs[0].getSphere().position.z);
 
 
-  for( var i = 0; i < intersects.length; i++ ) {
-    var obj = intersects[ i ].object;
-    obj.material.color.setRGB(.5,.5,.5);
+
+      }
+      else {
+        selected = obj;
+
+        obj.material.color.add(colorSEL);
+
+      }
+    }
+
   }
-
-
-  
 
 }
 
@@ -210,22 +311,30 @@ function render(dt) {
 
   // controls.update();
 
-  if (
-    sphere.position.x < 50 / -2 + sphere.scale.x ||
-    sphere.position.x > 50 / 2 - sphere.scale.x
-  ) {
-    movex *= -1;
-  }
-  if (
-    sphere.position.y < 50 / -2 + sphere.scale.y ||
-    sphere.position.y > 50 / 2 - sphere.scale.y
-  ) {
-    movey *= -1;
+  // if (
+  //   sphere.position.x < 50 / -2 + sphere.scale.x ||
+  //   sphere.position.x > 50 / 2 - sphere.scale.x
+  // ) {
+  //   movex *= -1;
+  // }
+  // if (
+  //   sphere.position.y < 50 / -2 + sphere.scale.y ||
+  //   sphere.position.y > 50 / 2 - sphere.scale.y
+  // ) {
+  //   movey *= -1;
+  // }
+
+  for(var i=0; i<mainBlobs.length; i++){
+    // mainBlobs.children[i].position.x += movex;
+    // mainBlobs.children[i].position.y += movey;
+
   }
 
-  for(var i=0; i<group.children.length; i++){
-    // group.children[i].position.x += movex;
-    // group.children[i].position.y += movey;
+
+
+  if(attacks[0].children.length !== 0){
+    attacks[0].children[0].position.x += .2;
+    attacks[0].children[0].position.y += .2;
 
   }
 
@@ -235,12 +344,8 @@ function render(dt) {
 
   // sphere_fill.scale.set(sphere_fill.radius*1.01,sphere_fill.radius*1.01,sphere_fill.radius*1.01);
 
-  if (sphere_fill.scale.x < sphere.scale.x * 0.92) {
-    sphere_fill.scale.set(
-      sphere_fill.scale.x + 0.003,
-      sphere_fill.scale.y + 0.003,
-      sphere_fill.scale.z + 0.003
-    );
+  for (var i = 0; i < fillBlobs.length; i++){
+    fillBlobs[i].updateScale();
   }
   renderer.render(scene, camera);
 }
