@@ -12,7 +12,8 @@ let {
   SphereGeometry,
   Mesh,
   Group,
-  Color
+  Color,
+  Object3D
 } = require('three')
 let loop = require("raf-loop");
 let WAGNER = require("@superguigui/wagner");
@@ -64,18 +65,29 @@ window.menuButton = menuButton
 */
 
 
+let d = new Date();
 class Blob extends Object3D {
-
-  constructor(name, size, position, move, grow, geometry, material, opacity) {
+  constructor(name, size, p, move, grow, geometry, material, opacity, parent, fill_mat) {
     super()
     this.move = move;
     this.grow = grow;
 
 
     this.sphere = new Mesh(geometry, material);
+    this.add(this.sphere)
     this.sphere.name = name;
     this.sphere.scale.set(size.x, size.y, size.z);
-    this.sphere.position.set(position.x, position.y, position.z);
+    this.sphere.position.set(p.x, p.y, p.z);
+
+
+
+    this.fill = new Mesh(geometry, fill_mat);
+    console.log(this.fill)
+
+    let fs = size.multiplyScalar(0.2);
+    this.fill.scale.set(fs.x, fs.y,fs.z);
+    this.fill.position.set(p.x, p.y, p.z);
+
     if (opacity){
       this.sphere.material.transparent = true;
       this.sphere.material.opacity = .8;  
@@ -94,13 +106,17 @@ class Blob extends Object3D {
     return this.sphere;
   }
 
-  updateScale() {
+  getFill() {
+    return this.fill
+  }
+
+  updateScale(t) {
     //change the 5 to actually access the parent size
-    if (this.sphere.scale.x < 5 * 0.92) {
-      this.sphere.scale.set(
-        this.sphere.scale.x + this.grow.x,
-        this.sphere.scale.y + this.grow.y,
-        this.sphere.scale.z + this.grow.z
+    if (this.fill.scale.x < 5 * 0.92) {
+      this.fill.scale.set(
+        this.fill.scale.x + this.grow.x,
+        this.fill.scale.y + this.grow.y,
+        this.fill.scale.z + this.grow.z
       );
     }
 
@@ -108,25 +124,21 @@ class Blob extends Object3D {
 }
 
 
-class Attack {
+class Attack extends Object3D {
 
-  constructor(name, size, position, move, geometry, material, opacity) {
-    this.move = move;
-    this.grow = grow;
-
-
+  constructor(name, geometry, material, scale, start, end, duration, targetObject) {
+    super()
     this.sphere = new Mesh(geometry, material);
+    this.add(this.sphere);
     this.sphere.name = name;
-    this.sphere.scale.set(size.x, size.y, size.z);
-    this.sphere.position.set(position.x, position.y, position.z);
-    if (opacity){
-      this.sphere.material.transparent = true;
-      this.sphere.material.opacity = .8;  
-    }
-    if (parent !== undefined) {
-      this.sphere.parent = parent;
-    }
+    this.sphere.scale.set(1, 1, 1);
+    this.sphere.position.set(start.x, start.y, start.z);
 
+    this.s = start;
+    this.e = end
+    
+    this.duration = duration;
+    this.startTime = d.getTime();
   }
 
   setChild(child){
@@ -137,20 +149,22 @@ class Attack {
     return this.sphere;
   }
 
+  updatePos(t) {
 
+    var s = this.s;
+    var e = this.e;
+    var dt = t - this.startTime;
+    var iif = dt / (this.duration);
+    var iiif = (1 - iif);
 
+    if(dt > this.duration) {
+      return;
+    }
+    
 
-  updatePos() {
-
-    this.sphere.position.x = this.move.x;
-    this.sphere.position.y = this.move.y;
+    this.sphere.position.set(s.x * iiif + e.x * iif, s.y * iiif + e.y * iif, s.z * iiif +  s.z * iif);
+    console.log(this.sphere.position, iiif)
   }
-
-
-  sayHi() {
-    console.log(this.sphere.position);
-  }
-
 }
 
 
@@ -233,15 +247,12 @@ var geometry = new SphereGeometry(0, 32, 32);
 
 //name, size, position, move, grow, geometry, material, opacity, parent
 var blob = new Blob("main1", new Vector3(5,5,5), new Vector3(-15,-5,0), new Vector2(0,0), 
-  new Vector3(0,0,0), geometry, materialRED, true, undefined);
+  new Vector3(0,0,0), geometry, materialRED, true, undefined, materialRED_fill);
 
 
 var blob2 = new Blob("main2", new Vector3(5,5,5), new Vector3(10,10,0), new Vector2(0,0), 
-  new Vector3(0,0,0), geometry, materialBLUE, true, undefined);
+  new Vector3(0,0,0), geometry, materialBLUE, true, undefined, materialBLUE_fill);
 
-
-var blobFill = new Blob("fill1", new Vector3(.1,.1,.1), new Vector3(-15,-5,0), new Vector2(0,0), 
-  new Vector3(.005,.005,.005), geometry, materialRED_fill, false, blob.getSphere());
 
 
 // ADD MAIN BLOBS 
@@ -253,20 +264,11 @@ mainBlobs.push(blob2);
 // might also use it for checking if the attack blobs are intersecting with main blobs
 var mainSpheres = [];
 for (var i=0; i<mainBlobs.length; i++){
-  mainSpheres.push(mainBlobs[i].getSphere());
-  scene.add(mainBlobs[i].getSphere());
+  mainSpheres.push(mainBlobs[i]);
+  scene.add(mainBlobs[i]);
+  scene.add(mainBlobs[i].getFill())
 }
 
-// ADD FILL BLOBS
-var fillBlobs = [];
-fillBlobs.push(blobFill);
-
-mainBlobs[0].setChild(fillBlobs[0].getSphere());
-
-
-for(var i=0; i<fillBlobs.length; i++){
-  scene.add(fillBlobs[i].getSphere());
-}
 
 
 // CREATE ARRAY OF ATTACKING BLOBS BUT LEAVE IT EMPTY FOR NOW
@@ -318,7 +320,7 @@ function onDocumentMouseMove(event) {
 function onClick(event){
 
   r.setFromCamera( mouse, camera );
-  var intersects = r.intersectObjects( mainSpheres );
+  var intersects = r.intersectObjects( mainSpheres.map(b => b.children[0]) );
 
   console.log(intersects);
 
@@ -345,23 +347,20 @@ function onClick(event){
         // scale which we can initialize the attack blob with
 
         // maybe coming up with a naming convention for attack would be useful, need to figure out concatenation in js
-
-        for(var i=0; i<fillBlobs.length; i++){
-          if(fillBlobs[i].getSphere().name.slice(4,5) === selected.name.slice(4,5)){
-            var tempFill = fillBlobs[i].getSphere();
-            break;
-          }
-        }
-
+        var tempFill = selected.parent.getFill();
+        
         var t = tempFill.scale;
         var p = tempFill.position;
+        var end = obj
+        console.log(end.position, tempFill.position);
         var mr = (obj.position.x - p.x) / (obj.position.y - p.y);
         console.log(1/mr*.01);
 
-        attacks.push(new Blob("", new Vector3(t.x*.75, t.y*.75, t.z*.75), new Vector3(p.x, p.y, p.z), new Vector2(.03*mr,.03*(1/mr)), 
-  new Vector3(0,0,0), geometry, selected.material, false, intersects[i].object));
 
-        scene.add(attacks[attacks.length-1].getSphere());
+        let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 1000, end);
+        attacks.push(attack);
+
+        scene.add(attack);
 
         selected = undefined;
 
@@ -379,11 +378,14 @@ function onClick(event){
 
 }
 
+
 /**
   Render loop
 */
 function render(dt) {
   if (SETTINGS.pause) return;
+  d = new Date();
+  let t = d.getTime();
   // camera.updateMatrixWorld();
   // r.setFromCamera(mouse, camera);
 
@@ -406,22 +408,17 @@ function render(dt) {
   //   movey *= -1;
   // }
 
-  for(var i=0; i<mainBlobs.length; i++){
-    // mainBlobs.children[i].position.x += movex;
-    // mainBlobs.children[i].position.y += movey;
-
-  }
 
 
   for (var i=0; i<attacks.length; i++) {
-    attacks[i].updatePos()
+    attacks[i].updatePos(t)
   }
 
 
   // sphere_fill.scale.set(sphere_fill.radius*1.01,sphere_fill.radius*1.01,sphere_fill.radius*1.01);
 
-  for (var i = 0; i < fillBlobs.length; i++){
-    fillBlobs[i].updateScale();
+  for (var i = 0; i < mainBlobs.length; i++){
+    mainBlobs[i].updateScale(t);
   }
   renderer.render(scene, camera);
 }
