@@ -22,7 +22,6 @@ class Attack extends Object3D {
     this.sphere.position.set(start.x, start.y, start.z);
 
     this.color = color;
-    console.log(color);
     this.s = start;
     this.e = end
     let d = new Date();
