@@ -15,6 +15,8 @@ let {
   Color,
   Object3D
 } = require('three')
+let Blob = require('objects/Blob');
+let Attack = require('objects/Attack')
 let loop = require("raf-loop");
 let WAGNER = require("@superguigui/wagner");
 let BloomPass = require("@superguigui/wagner/src/passes/bloom/MultiPassBloomPass");
@@ -85,7 +87,6 @@ window.menuButton = menuButton
 */
 
 
-let d = new Date();
 class Blob extends Object3D {
   constructor(name, size, p, grow, geometry, material, fill_mat) {
     super()
@@ -135,6 +136,10 @@ class Blob extends Object3D {
     }
 
   }
+
+  dealDamage(attackingOrb) {
+
+  }
 }
 
 
@@ -152,6 +157,8 @@ class Attack extends Object3D {
     this.e = end
     
     this.duration = duration;
+
+    let d = new Date();
     this.startTime = d.getTime();
     this.targetObject = targetObject;
   }
