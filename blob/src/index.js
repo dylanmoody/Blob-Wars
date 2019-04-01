@@ -83,6 +83,8 @@ function menuButton() {
 window.menuButton = menuButton
 
 
+
+
 /*
   
   creating class to store the spheres here for now for convenience
@@ -301,7 +303,7 @@ function onClick(event){
 
 
       }
-      else {
+      else if (obj.parent.color === 'blue'){
         selected = obj;
 
         obj.material.color.add(colorSEL);
@@ -313,23 +315,45 @@ function onClick(event){
 
 }
 
-function aiMove(scene) {
-  const AICOLOR = 'red';
-  const OPPONENTCOLOR = 'blue';
-  const NEUTRALCOLOR = 'gray';
+
+const AICOLOR = 'red';
+const OPPONENTCOLOR = 'blue';
+const NEUTRALCOLOR = 'gray';
+
+let aiMove = (scene) => {
+  let dist = (v1, v2) => {
+    return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) + Math.pow(v1.z - v2.z, 2));
+  }
 
 
   let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR);
   let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === OPPONENTCOLOR);
   let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
-  console.log(aiBlobs, opponentBlobs, neutralBlobs);
+
+
+  let aiTarget = aiBlobs[Math.floor(Math.random() * aiBlobs.length)]
+  let target;
+  if(neutralBlobs.length === 0) {
+    target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)]
+  } else {
+    target = neutralBlobs[Math.floor(Math.random() * neutralBlobs.length)]
+  }
+
+  let di = dist(aiTarget.getFill().position, target.getFill().position);
+
+
+  let attack = new Attack("", geometry, aiTarget.getSphere().material, aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
   
-
-
+  scene.add(attack);
 }
 
 function winCondition(scene) {
-  return false;
+  let blobs = scene.children.filter(o => o instanceof Blob)
+  let playerWinCondition = blobs.reduce((r, o) => r && o.color === OPPONENTCOLOR, true)
+  let aiWinCondition = blobs.reduce((r, o) => r instanceof Blob && o.color === AICOLOR, true);
+  if (playerWinCondition) return 1;
+  if (aiWinCondition) return -1;
+  return 0;
 }
 
 
@@ -348,10 +372,14 @@ function render(dt) {
     if(child.update) child.update(t)
   }
 
-  if (ai % 1000) {
+  if (ai % 300 === 0) {
     aiMove(scene);
   }
   ai++;
 
+  let wincond = winCondition(scene);
+
+  if(wincond > 0) alert("yay you win");
+  if(wincond < 0) alert('ai wins');
   renderer.render(scene, camera);
 }
