@@ -15,6 +15,14 @@ let {
   Color,
   Object3D
 } = require('three');
+let {
+  materialRED, 
+  materialGRAY, 
+  materialBLUE, 
+  materialGRAY_fill, 
+  materialBLUE_fill, 
+  materialRED_fill
+} = require("./colors.js");
 let Blob = require("./objects/Blob.js");
 let Attack = require("./objects/Attack.js");
 let loop = require("raf-loop");
@@ -153,12 +161,7 @@ scene.add( directionalLight );
 */
 
 
-var materialRED = new MeshLambertMaterial({color:0x900000});
-var materialRED_fill = new MeshStandardMaterial({color:0xff2222});
-var materialBLUE = new MeshLambertMaterial({color:0x0000ff});
-var materialBLUE_fill = new MeshStandardMaterial({color:0x3333ff});
-var materialGRAY = new MeshLambertMaterial({color:0x7d7d7d});
-var materialGRAY_fill = new MeshLambertMaterial({color:0xa0a0a0});
+
 
 
 var colorSEL = new Color(0x3f3f3f);
