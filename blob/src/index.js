@@ -64,9 +64,10 @@ window.menuButton = menuButton
 */
 
 
-class Blob {
+class Blob extends Object3D {
 
   constructor(name, size, position, move, grow, geometry, material, opacity) {
+    super()
     this.move = move;
     this.grow = grow;
 
