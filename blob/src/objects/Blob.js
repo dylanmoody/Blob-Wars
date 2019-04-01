@@ -81,11 +81,11 @@ class Blob extends Object3D {
         this.fill.scale.set(.1*this.sphere.scale.x, .1*this.sphere.scale.y, .1*this.sphere.scale.z );
         if(attackBlob.getColor() === "red"){
           this.sphere.material.color.set(colorRED);
-          this.sphere.material.color.set(colorRED_fill)
+          this.fill.material.color.set(colorRED_fill)
         }
         else if (attackBlob.getColor() === "blue") {
           this.sphere.material.color.set(colorBLUE);
-          this.sphere.material.color.set(colorBLUE_fill);
+          this.fill.material.color.set(colorBLUE_fill);
         }
         this.grow = new Vector3(.002,.002,.002);
         this.color = attackBlob.getColor();
