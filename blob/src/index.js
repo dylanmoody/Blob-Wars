@@ -259,7 +259,7 @@ function onDocumentMouseMove(event) {
 function onClick(event){
 
   r.setFromCamera( mouse, camera );
-  var intersects = r.intersectObjects( mainSpheres.map(b => b.children[0]) );
+  var intersects = r.intersectObjects( mainBlobs.map(b => b.children[0]) );
 
 
   if(intersects.length === 0 && selected !== undefined ){
@@ -311,6 +311,16 @@ function onClick(event){
 
   }
 
+}
+
+function aiMove(scene) {
+  let AICOLOR = 'red';
+
+  
+}
+
+function winCondition(scene) {
+  return false;
 }
 
 

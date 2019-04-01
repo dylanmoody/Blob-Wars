@@ -39,6 +39,7 @@ class Attack extends Object3D {
     var iiif = (1 - iif);
 
     if(dt > this.duration) {
+      console.log(this.targetObject.parent)
       this.targetObject.parent.dealDamage(this);
       this.parent.remove(this);
       return;
