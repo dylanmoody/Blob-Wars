@@ -46,7 +46,12 @@ class Blob extends Object3D {
   }
 
   dealDamage(attackBlob) {
-    
+    if (this.color === "gray") {
+      console.log(attackBlob.getSize());
+    }
+    else if (this.color === "red") {
+      console.log(attackBlob.getSize());
+    }
   }
 
   update(t) {

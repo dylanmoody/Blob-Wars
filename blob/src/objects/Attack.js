@@ -29,6 +29,10 @@ class Attack extends Object3D {
     return this.sphere;
   }
 
+  getSize() {
+    return this.sphere.scale.x;
+  }
+
   getColor() {
     return this.color;
   }
