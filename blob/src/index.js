@@ -23,14 +23,34 @@ let resize = require("brindille-resize");
 let OrbitControls = require("./controls/OrbitControls");
 let { gui } = require("./utils/debug");
 
+// let stage = {
+//     blue: {x:0.1, y:0.5, health: 100},
+//     red: {x:0.9, y:0.5, health: 100},
+//     blobs: [
+//         {x: -60,y: -25},
+//         {x: 60,y: 25},
+//         {x: 30,y: 10},
+//         {x: -30,y: 10},
+//         {x: 30,y: -10},
+//         {x: -30,y: -10},
+//     ]
+// }
+
 let stage = {
-    blue: {x:0.1, y:0.5, health: 100},
-    red: {x:0.9, y:0.5, health: 100},
-    blobs: [
-        {x: 0.25,y: 0.5},
-        {x: 0.75,y: 0.5},
-    ]
+  blue: [
+    {x: -60,y: -25, size: 7},
+  ],
+  red: [
+    {x: 60,y: 25, size: 7},
+  ],
+  gray: [
+    {x: 30,y: 10, size: 3},
+    {x: -30,y: 10, size: 3},
+    {x: 30,y: -10, size: 3},
+    {x: -30,y: -10, size: 3},
+  ]
 }
+
 
 /* Custom settings */
 const SETTINGS = {
@@ -67,13 +87,12 @@ window.menuButton = menuButton
 
 let d = new Date();
 class Blob extends Object3D {
-  constructor(name, size, p, move, grow, geometry, material, opacity, parent, fill_mat) {
+  constructor(name, size, p, grow, geometry, material, fill_mat) {
     super()
-    this.move = move;
     this.grow = grow;
 
 
-    this.sphere = new Mesh(geometry, material);
+    this.sphere = new Mesh(geometry, material.clone());
     this.add(this.sphere)
     this.sphere.name = name;
     this.sphere.scale.set(size.x, size.y, size.z);
@@ -81,20 +100,15 @@ class Blob extends Object3D {
 
 
 
-    this.fill = new Mesh(geometry, fill_mat);
-    console.log(this.fill)
+    this.fill = new Mesh(geometry, fill_mat.clone());
 
-    let fs = size.multiplyScalar(0.2);
+    let fs = size.multiplyScalar(0.1);
     this.fill.scale.set(fs.x, fs.y,fs.z);
     this.fill.position.set(p.x, p.y, p.z);
 
-    if (opacity){
-      this.sphere.material.transparent = true;
-      this.sphere.material.opacity = .8;  
-    }
-    if (parent !== undefined) {
-      this.sphere.parent = parent;
-    }
+    this.sphere.material.transparent = true;
+    this.sphere.material.opacity = .8;  
+
 
   }
 
@@ -128,10 +142,10 @@ class Attack extends Object3D {
 
   constructor(name, geometry, material, scale, start, end, duration, targetObject) {
     super()
-    this.sphere = new Mesh(geometry, material);
+    this.sphere = new Mesh(geometry, material.clone());
     this.add(this.sphere);
     this.sphere.name = name;
-    this.sphere.scale.set(1, 1, 1);
+    this.sphere.scale.set(scale.x, scale.y, scale.z);
     this.sphere.position.set(start.x, start.y, start.z);
 
     this.s = start;
@@ -139,6 +153,7 @@ class Attack extends Object3D {
     
     this.duration = duration;
     this.startTime = d.getTime();
+    this.targetObject = targetObject;
   }
 
   setChild(child){
@@ -158,12 +173,27 @@ class Attack extends Object3D {
     var iiif = (1 - iif);
 
     if(dt > this.duration) {
+      switch(this.targetObject.material.name) {
+        case "red":
+          // code block
+          
+          console.log(this.targetObject.material.name);
+          break;
+        case "blue":
+          // code block
+          break;
+        case "gray":
+          // cs
+          break;
+        default:
+          console.log("oh no");
+          // code block
+      } 
       return;
     }
     
 
     this.sphere.position.set(s.x * iiif + e.x * iif, s.y * iiif + e.y * iif, s.z * iiif +  s.z * iif);
-    console.log(this.sphere.position, iiif)
   }
 }
 
@@ -239,26 +269,47 @@ var materialRED = new MeshLambertMaterial({color:0x900000});
 var materialRED_fill = new MeshStandardMaterial({color:0xff2222});
 var materialBLUE = new MeshLambertMaterial({color:0x0000ff});
 var materialBLUE_fill = new MeshStandardMaterial({color:0x3333ff});
+var materialGRAY = new MeshLambertMaterial({color:0x7d7d7d});
+var materialGRAY_fill = new MeshLambertMaterial({color:0xa0a0a0});
+
+materialRED.name = "red";
+materialBLUE.name = "blue";
+materialGRAY.name = "gray";
+
 
 var colorSEL = new Color(0x3f3f3f);
 
 
 var geometry = new SphereGeometry(0, 32, 32);
 
-//name, size, position, move, grow, geometry, material, opacity, parent
-var blob = new Blob("main1", new Vector3(5,5,5), new Vector3(-15,-5,0), new Vector2(0,0), 
-  new Vector3(0,0,0), geometry, materialRED, true, undefined, materialRED_fill);
-
-
-var blob2 = new Blob("main2", new Vector3(5,5,5), new Vector3(10,10,0), new Vector2(0,0), 
-  new Vector3(0,0,0), geometry, materialBLUE, true, undefined, materialBLUE_fill);
-
-
-
 // ADD MAIN BLOBS 
 var mainBlobs = [];
-mainBlobs.push(blob);
-mainBlobs.push(blob2);
+var s;
+
+// CREATE BLUE BLOBS
+for (var i=0; i<stage.red.length; i++){
+  s = stage.red[i].size;
+  var blob = new Blob("main"+i, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0), new Vector3(.004,.004,.004), 
+    geometry, materialRED, materialRED_fill);
+  mainBlobs.push(blob);
+}
+
+// CREATE RED BLOBS
+for (var i=0; i<stage.blue.length; i++){
+  s = stage.blue[i].size;
+  var blob = new Blob("main"+stage.red.length+i, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
+    new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill);
+  mainBlobs.push(blob);
+}
+
+// CREATE NEUTRAL BLOBS
+for (var i=0; i<stage.gray.length; i++){
+  s = stage.gray[i].size;
+  var blob = new Blob("main"+stage.red.length+stage.blue.length+i, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
+    new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill);
+  mainBlobs.push(blob);
+}
+
 
 // this is necessary so that we can call intersect on all of them (for selection)
 // might also use it for checking if the attack blobs are intersecting with main blobs
@@ -322,7 +373,6 @@ function onClick(event){
   r.setFromCamera( mouse, camera );
   var intersects = r.intersectObjects( mainSpheres.map(b => b.children[0]) );
 
-  console.log(intersects);
 
   if(intersects.length === 0 && selected !== undefined ){
     selected.material.color.sub(colorSEL);
@@ -348,16 +398,13 @@ function onClick(event){
 
         // maybe coming up with a naming convention for attack would be useful, need to figure out concatenation in js
         var tempFill = selected.parent.getFill();
-        
-        var t = tempFill.scale;
-        var p = tempFill.position;
+
         var end = obj
-        console.log(end.position, tempFill.position);
-        var mr = (obj.position.x - p.x) / (obj.position.y - p.y);
-        console.log(1/mr*.01);
+
+        var dist = Math.sqrt(Math.pow(selected.position.x - end.position.x,2) + Math.pow(selected.position.y - end.position.y,2));
 
 
-        let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 1000, end);
+        let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end);
         attacks.push(attack);
 
         scene.add(attack);
@@ -386,36 +433,12 @@ function render(dt) {
   if (SETTINGS.pause) return;
   d = new Date();
   let t = d.getTime();
-  // camera.updateMatrixWorld();
-  // r.setFromCamera(mouse, camera);
-
-
-  //console.log(intersections.length > 0 ? intersections : null)
-  
-
-  // controls.update();
-
-  // if (
-  //   sphere.position.x < 50 / -2 + sphere.scale.x ||
-  //   sphere.position.x > 50 / 2 - sphere.scale.x
-  // ) {
-  //   movex *= -1;
-  // }
-  // if (
-  //   sphere.position.y < 50 / -2 + sphere.scale.y ||
-  //   sphere.position.y > 50 / 2 - sphere.scale.y
-  // ) {
-  //   movey *= -1;
-  // }
-
 
 
   for (var i=0; i<attacks.length; i++) {
     attacks[i].updatePos(t)
   }
 
-
-  // sphere_fill.scale.set(sphere_fill.radius*1.01,sphere_fill.radius*1.01,sphere_fill.radius*1.01);
 
   for (var i = 0; i < mainBlobs.length; i++){
     mainBlobs[i].updateScale(t);
