@@ -4,13 +4,14 @@ let {
 } = require('three');
 class Attack extends Object3D {
 
-  constructor(name, geometry, material, scale, start, end, duration, targetObject) {
+  constructor(name, geometry, material, scale, start, end, duration, targetObject, attacks) {
     super()
     this.sphere = new Mesh(geometry, material.clone());
     this.add(this.sphere);
     this.sphere.name = name;
     this.sphere.scale.set(scale.x, scale.y, scale.z);
     this.sphere.position.set(start.x, start.y, start.z);
+    this.attacks = attacks;
 
     this.s = start;
     this.e = end
@@ -28,7 +29,7 @@ class Attack extends Object3D {
     return this.sphere;
   }
 
-  updatePos(t) {
+  update(t) {
     
 
     var s = this.s;
@@ -38,24 +39,8 @@ class Attack extends Object3D {
     var iiif = (1 - iif);
 
     if(dt > this.duration) {
-      switch(this.targetObject.material.name) {
-        case "red":
-          // code block
-          if(this.sphere.material.name === "red") {
-            
-          }
-          console.log(this.targetObject.material.name);
-          break;
-        case "blue":
-          // code block
-          break;
-        case "gray":
-          // cs
-          break;
-        default:
-          console.log("oh no");
-          // code block
-      } 
+      this.targetObject.parent.dealDamage(this);
+      this.parent.remove(this);
       return;
     }
     

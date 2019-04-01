@@ -322,14 +322,11 @@ function render(dt) {
   d = new Date();
   let t = d.getTime();
 
-
-  for (var i=0; i<attacks.length; i++) {
-    attacks[i].updatePos(t)
+  for(var i = 0; i < scene.children.length; i++) {
+    let child = scene.children[i];
+    if(child.update) child.update(t)
   }
 
 
-  for (var i = 0; i < mainBlobs.length; i++){
-    mainBlobs[i].updateScale(t);
-  }
   renderer.render(scene, camera);
 }

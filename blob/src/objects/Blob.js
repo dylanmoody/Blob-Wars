@@ -40,7 +40,11 @@ class Blob extends Object3D {
     return this.fill
   }
 
-  updateScale(t) {
+  dealDamage(attackBlob) {
+    
+  }
+
+  update(t) {
     //change the 5 to actually access the parent size
     if (this.fill.scale.x < 5 * 0.92) {
       this.fill.scale.set(
