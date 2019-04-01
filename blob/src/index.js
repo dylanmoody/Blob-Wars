@@ -160,10 +160,6 @@ var materialBLUE_fill = new MeshStandardMaterial({color:0x3333ff});
 var materialGRAY = new MeshLambertMaterial({color:0x7d7d7d});
 var materialGRAY_fill = new MeshLambertMaterial({color:0xa0a0a0});
 
-materialRED.name = "red";
-materialBLUE.name = "blue";
-materialGRAY.name = "gray";
-
 
 var colorSEL = new Color(0x3f3f3f);
 
@@ -178,7 +174,7 @@ var s;
 for (var i=0; i<stage.red.length; i++){
   s = stage.red[i].size;
   var blob = new Blob("main"+i, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0), new Vector3(.004,.004,.004), 
-    geometry, materialRED, materialRED_fill);
+    geometry, materialRED, materialRED_fill, "red");
   mainBlobs.push(blob);
 }
 
@@ -186,7 +182,7 @@ for (var i=0; i<stage.red.length; i++){
 for (var i=0; i<stage.blue.length; i++){
   s = stage.blue[i].size;
   var blob = new Blob("main"+stage.red.length+i, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
-    new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill);
+    new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill, "blue");
   mainBlobs.push(blob);
 }
 
@@ -194,7 +190,7 @@ for (var i=0; i<stage.blue.length; i++){
 for (var i=0; i<stage.gray.length; i++){
   s = stage.gray[i].size;
   var blob = new Blob("main"+stage.red.length+stage.blue.length+i, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
-    new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill);
+    new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
   mainBlobs.push(blob);
 }
 
@@ -292,7 +288,8 @@ function onClick(event){
         var dist = Math.sqrt(Math.pow(selected.position.x - end.position.x,2) + Math.pow(selected.position.y - end.position.y,2));
 
 
-        let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end);
+        let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end, selected.parent.getColor());
+
         attacks.push(attack);
 
         scene.add(attack);

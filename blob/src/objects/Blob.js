@@ -3,9 +3,10 @@ let {
   Mesh
 } = require('three');
 class Blob extends Object3D {
-  constructor(name, size, p, grow, geometry, material, fill_mat) {
+  constructor(name, size, p, grow, geometry, material, fill_mat, color) {
     super()
     this.grow = grow;
+    this.color = color;
 
 
     this.sphere = new Mesh(geometry, material.clone());
@@ -30,6 +31,10 @@ class Blob extends Object3D {
 
   setChild(child){
     this.sphere.children.push(child);
+  }
+
+  getColor() {
+    return this.color;
   }
 
   getSphere() {
