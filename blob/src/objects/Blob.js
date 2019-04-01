@@ -2,6 +2,15 @@ let {
   Object3D,
   Mesh
 } = require('three');
+let {
+  coloRED, 
+  colorGRAY, 
+  colorBLUE, 
+  colorGRAY_fill, 
+  colorBLUE_fill, 
+  colorRED_fill,
+  colorSEL
+} = require("../colors.js");
 class Blob extends Object3D {
   constructor(name, size, p, grow, geometry, material, fill_mat, color) {
     super()
@@ -46,8 +55,15 @@ class Blob extends Object3D {
   }
 
   dealDamage(attackBlob) {
+    var s = attackBlob.getSize();
     if (this.color === "gray") {
-      console.log(attackBlob.getSize());
+      this.scale.set(
+        this.fill.scale.x += s.x,
+        this.fill.scale.y += s.y,
+        this.fill.scale.z += s.z
+        );
+      
+
     }
     else if (this.color === "red") {
       console.log(attackBlob.getSize());

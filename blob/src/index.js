@@ -16,12 +16,13 @@ let {
   Object3D
 } = require('three');
 let {
-  materialRED, 
-  materialGRAY, 
-  materialBLUE, 
-  materialGRAY_fill, 
-  materialBLUE_fill, 
-  materialRED_fill
+  colorRED, 
+  colorGRAY, 
+  colorBLUE, 
+  colorGRAY_fill, 
+  colorBLUE_fill, 
+  colorRED_fill,
+  colorSEL
 } = require("./colors.js");
 let Blob = require("./objects/Blob.js");
 let Attack = require("./objects/Attack.js");
@@ -161,10 +162,15 @@ scene.add( directionalLight );
 */
 
 
+var materialRED = new MeshLambertMaterial({color:colorRED});
+var materialRED_fill = new MeshStandardMaterial({color:colorRED_fill});
+var materialBLUE = new MeshLambertMaterial({color:colorBLUE});
+var materialBLUE_fill = new MeshStandardMaterial({color:colorBLUE_fill});
+var materialGRAY = new MeshLambertMaterial({color:colorGRAY});
+var materialGRAY_fill = new MeshLambertMaterial({color:colorGRAY_fill});
 
 
 
-var colorSEL = new Color(0x3f3f3f);
 
 
 var geometry = new SphereGeometry(0, 32, 32);

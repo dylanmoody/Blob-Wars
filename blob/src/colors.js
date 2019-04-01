@@ -1,13 +1,16 @@
 let {
-  MeshLambertMaterial,
-  MeshStandardMaterial,
+  Color
 } = require('three');
 
-var materialRED = new MeshLambertMaterial({color:0x900000});
-var materialRED_fill = new MeshStandardMaterial({color:0xff2222});
-var materialBLUE = new MeshLambertMaterial({color:0x0000ff});
-var materialBLUE_fill = new MeshStandardMaterial({color:0x3333ff});
-var materialGRAY = new MeshLambertMaterial({color:0x7d7d7d});
-var materialGRAY_fill = new MeshLambertMaterial({color:0xa0a0a0});
+var colorSEL = new Color(0x3f3f3f);
+var colorRED = new Color(0x900000);
+var colorGRAY = new Color(0x7d7d7d); 
+var colorBLUE = new Color(0x0000ff); 
+var colorGRAY_fill = new Color(0xa0a0a0); 
+var colorBLUE_fill = new Color(0x3333ff); 
+var colorRED_fill = new Color(0xff2222);
 
-module.exports = {materialRED, materialGRAY, materialBLUE, materialGRAY_fill, materialBLUE_fill, materialRED_fill}
+
+
+
+module.exports = {colorRED, colorGRAY, colorBLUE, colorGRAY_fill, colorBLUE_fill, colorRED_fill, colorSEL}
