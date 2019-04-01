@@ -4,15 +4,16 @@ let {
 } = require('three');
 class Attack extends Object3D {
 
-  constructor(name, geometry, material, scale, start, end, duration, targetObject, attacks) {
+  constructor(name, geometry, material, scale, start, end, duration, targetObject, color) {
     super()
     this.sphere = new Mesh(geometry, material.clone());
     this.add(this.sphere);
     this.sphere.name = name;
     this.sphere.scale.set(scale.x, scale.y, scale.z);
     this.sphere.position.set(start.x, start.y, start.z);
-    this.attacks = attacks;
 
+    this.color = color;
+    console.log(color);
     this.s = start;
     this.e = end
     let d = new Date();
@@ -27,6 +28,10 @@ class Attack extends Object3D {
 
   getSphere() {
     return this.sphere;
+  }
+
+  getColor() {
+    return this.color;
   }
 
   update(t) {
