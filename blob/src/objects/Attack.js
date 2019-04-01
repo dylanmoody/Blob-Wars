@@ -2,6 +2,15 @@ let {
   Object3D,
   Mesh
 } = require('three');
+let {
+  colorRED, 
+  colorGRAY, 
+  colorBLUE, 
+  colorGRAY_fill, 
+  colorBLUE_fill, 
+  colorRED_fill,
+  colorSEL
+} = require("../colors.js");
 class Attack extends Object3D {
 
   constructor(name, geometry, material, scale, start, end, duration, targetObject, color) {
@@ -30,7 +39,7 @@ class Attack extends Object3D {
   }
 
   getSize() {
-    return this.sphere.scale.x;
+    return this.sphere.scale;
   }
 
   getColor() {

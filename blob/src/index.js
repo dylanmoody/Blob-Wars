@@ -16,12 +16,13 @@ let {
   Object3D
 } = require('three');
 let {
-  materialRED, 
-  materialGRAY, 
-  materialBLUE, 
-  materialGRAY_fill, 
-  materialBLUE_fill, 
-  materialRED_fill
+  colorRED, 
+  colorGRAY, 
+  colorBLUE, 
+  colorGRAY_fill, 
+  colorBLUE_fill, 
+  colorRED_fill,
+  colorSEL
 } = require("./colors.js");
 let Blob = require("./objects/Blob.js");
 let Attack = require("./objects/Attack.js");
@@ -163,10 +164,15 @@ scene.add( directionalLight );
 */
 
 
+var materialRED = new MeshLambertMaterial({color:colorRED});
+var materialRED_fill = new MeshStandardMaterial({color:colorRED_fill});
+var materialBLUE = new MeshLambertMaterial({color:colorBLUE});
+var materialBLUE_fill = new MeshStandardMaterial({color:colorBLUE_fill});
+var materialGRAY = new MeshLambertMaterial({color:colorGRAY});
+var materialGRAY_fill = new MeshLambertMaterial({color:colorGRAY_fill});
 
 
 
-var colorSEL = new Color(0x3f3f3f);
 
 
 var geometry = new SphereGeometry(0, 32, 32);
@@ -252,6 +258,7 @@ function onResize() {
 function onDocumentMouseMove(event) {
   event.preventDefault();
 
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -315,7 +322,6 @@ function onClick(event){
 
 }
 
-
 const AICOLOR = 'red';
 const OPPONENTCOLOR = 'blue';
 const NEUTRALCOLOR = 'gray';
@@ -339,6 +345,9 @@ let aiMove = (scene) => {
     target = neutralBlobs[Math.floor(Math.random() * neutralBlobs.length)]
   }
 
+  if(!target) return;
+
+
   let di = dist(aiTarget.getFill().position, target.getFill().position);
 
 
@@ -350,10 +359,20 @@ let aiMove = (scene) => {
 function winCondition(scene) {
   let blobs = scene.children.filter(o => o instanceof Blob)
   let playerWinCondition = blobs.reduce((r, o) => r && o.color === OPPONENTCOLOR, true)
-  let aiWinCondition = blobs.reduce((r, o) => r instanceof Blob && o.color === AICOLOR, true);
+  let aiWinCondition = blobs.reduce((r, o) => r && o.color === AICOLOR, true);
   if (playerWinCondition) return 1;
   if (aiWinCondition) return -1;
   return 0;
+}
+
+function showWinMessage(message) {
+  var h1 = document.createElement("H1");
+  h1.classList.add("ui", "title", "center");
+  var text = document.createTextNode(message);
+  h1.appendChild(text);
+
+  document.getElementById("TitleMenu").appendChild(h1);
+
 }
 
 
@@ -362,8 +381,22 @@ function winCondition(scene) {
 */
 let ai = 0;
 function render(dt) {
+  
+
 
   if (SETTINGS.pause) return;
+
+  let wincond = winCondition(scene);
+  if(wincond > 0) {
+    showWinMessage("yay you win");
+    SETTINGS.pause = true;
+    return;
+  }
+  if(wincond < 0){ 
+    showWinMessage('ai wins');
+    SETTINGS.pause = true;
+    return;
+  }
   d = new Date();
   let t = d.getTime();
 
@@ -372,14 +405,11 @@ function render(dt) {
     if(child.update) child.update(t)
   }
 
-  if (ai % 300 === 0) {
+  if (ai % 1 === 0) {
     aiMove(scene);
   }
   ai++;
 
-  let wincond = winCondition(scene);
-
-  if(wincond > 0) alert("yay you win");
-  if(wincond < 0) alert('ai wins');
+  
   renderer.render(scene, camera);
 }
