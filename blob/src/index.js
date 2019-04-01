@@ -14,9 +14,10 @@ let {
   Group,
   Color,
   Object3D
-} = require('three')
-let Blob = require('objects/Blob');
-let Attack = require('objects/Attack')
+<<<<<<< HEAD
+} = require('three');
+let Blob = require("./objects/Blob.js");
+let Attack = require("./objects/Attack.js");
 let loop = require("raf-loop");
 let WAGNER = require("@superguigui/wagner");
 let BloomPass = require("@superguigui/wagner/src/passes/bloom/MultiPassBloomPass");
@@ -87,6 +88,9 @@ window.menuButton = menuButton
 */
 
 
+<<<<<<< HEAD
+let d = new Date();
+=======
 class Blob extends Object3D {
   constructor(name, size, p, grow, geometry, material, fill_mat) {
     super()
@@ -204,6 +208,7 @@ class Attack extends Object3D {
   }
 }
 
+>>>>>>> 06ee7432cd10198a7564898eb69ab10354e74600
 
 /* Init renderer and canvas */
 const container = document.body;
