@@ -311,9 +311,18 @@ function onClick(event){
 }
 
 function aiMove(scene) {
-  let AICOLOR = 'red';
+  const AICOLOR = 'red';
+  const OPPONENTCOLOR = 'blue';
+  const NEUTRALCOLOR = 'gray';
 
+
+  let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR);
+  let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === OPPONENTCOLOR);
+  let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
+  console.log(aiBlobs, opponentBlobs, neutralBlobs);
   
+
+
 }
 
 function winCondition(scene) {
@@ -324,7 +333,9 @@ function winCondition(scene) {
 /**
   Render loop
 */
+let ai = 0;
 function render(dt) {
+
   if (SETTINGS.pause) return;
   d = new Date();
   let t = d.getTime();
@@ -334,6 +345,10 @@ function render(dt) {
     if(child.update) child.update(t)
   }
 
+  if (ai % 1000) {
+    aiMove(scene);
+  }
+  ai++;
 
   renderer.render(scene, camera);
 }

@@ -13,7 +13,6 @@ class Attack extends Object3D {
     this.sphere.position.set(start.x, start.y, start.z);
 
     this.color = color;
-    console.log(color);
     this.s = start;
     this.e = end
     let d = new Date();
@@ -44,7 +43,6 @@ class Attack extends Object3D {
     var iiif = (1 - iif);
 
     if(dt > this.duration) {
-      console.log(this.targetObject.parent)
       this.targetObject.parent.dealDamage(this);
       this.parent.remove(this);
       return;
