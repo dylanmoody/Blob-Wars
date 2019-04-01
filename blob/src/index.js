@@ -61,6 +61,7 @@ class Blob {
     this.move = move;
     this.grow = grow;
 
+
     this.sphere = new Mesh(geometry, material);
     this.sphere.name = name;
     this.sphere.scale.set(size.x, size.y, size.z);
@@ -69,7 +70,14 @@ class Blob {
       this.sphere.material.transparent = true;
       this.sphere.material.opacity = .8;  
     }
+    if (parent !== undefined) {
+      this.sphere.parent = parent;
+    }
 
+  }
+
+  setChild(child){
+    this.sphere.children.push(child);
   }
 
   getSphere() {
@@ -87,14 +95,53 @@ class Blob {
     }
 
   }
- 
+}
+
+
+class Attack {
+
+  constructor(name, size, position, move, geometry, material, opacity) {
+    this.move = move;
+    this.grow = grow;
+
+
+    this.sphere = new Mesh(geometry, material);
+    this.sphere.name = name;
+    this.sphere.scale.set(size.x, size.y, size.z);
+    this.sphere.position.set(position.x, position.y, position.z);
+    if (opacity){
+      this.sphere.material.transparent = true;
+      this.sphere.material.opacity = .8;  
+    }
+    if (parent !== undefined) {
+      this.sphere.parent = parent;
+    }
+
+  }
+
+  setChild(child){
+    this.sphere.children.push(child);
+  }
+
+  getSphere() {
+    return this.sphere;
+  }
+
+
+
+
+  updatePos() {
+
+    this.sphere.position.x = this.move.x;
+    this.sphere.position.y = this.move.y;
+  }
+
+
   sayHi() {
     console.log(this.sphere.position);
   }
 
 }
-
-
 
 
 /* Init renderer and canvas */
@@ -174,17 +221,17 @@ var colorSEL = new Color(0x3f3f3f);
 
 var geometry = new SphereGeometry(0, 32, 32);
 
-//name, size, position, move, grow, geometry, material
+//name, size, position, move, grow, geometry, material, opacity, parent
 var blob = new Blob("main1", new Vector3(5,5,5), new Vector3(-15,-5,0), new Vector2(0,0), 
-  new Vector3(0,0,0), geometry, materialRED, true);
+  new Vector3(0,0,0), geometry, materialRED, true, undefined);
 
 
 var blob2 = new Blob("main2", new Vector3(5,5,5), new Vector3(10,10,0), new Vector2(0,0), 
-  new Vector3(0,0,0), geometry, materialBLUE, true);
+  new Vector3(0,0,0), geometry, materialBLUE, true, undefined);
 
 
 var blobFill = new Blob("fill1", new Vector3(.1,.1,.1), new Vector3(-15,-5,0), new Vector2(0,0), 
-  new Vector3(.005,.005,.005), geometry, materialRED_fill, false);
+  new Vector3(.005,.005,.005), geometry, materialRED_fill, false, blob.getSphere());
 
 
 // ADD MAIN BLOBS 
@@ -192,27 +239,31 @@ var mainBlobs = [];
 mainBlobs.push(blob);
 mainBlobs.push(blob2);
 
-var mainBlobGroup = new Group();
-mainBlobGroup.add(blob.getSphere());
-mainBlobGroup.add(blob2.getSphere());
+// this is necessary so that we can call intersect on all of them (for selection)
+// might also use it for checking if the attack blobs are intersecting with main blobs
+var mainSpheres = [];
+for (var i=0; i<mainBlobs.length; i++){
+  mainSpheres.push(mainBlobs[i].getSphere());
+  scene.add(mainBlobs[i].getSphere());
+}
 
 // ADD FILL BLOBS
 var fillBlobs = [];
 fillBlobs.push(blobFill);
 
-scene.add(mainBlobGroup);
+mainBlobs[0].setChild(fillBlobs[0].getSphere());
+
 
 for(var i=0; i<fillBlobs.length; i++){
   scene.add(fillBlobs[i].getSphere());
 }
 
 
-// CREATE ARRAY OF ATTACKING GROUPS AND ADD THEM ALL
-var attacks = [new Group()];
-// NEEDS A FOR LOOP
-scene.add(attacks[0]);
+// CREATE ARRAY OF ATTACKING BLOBS BUT LEAVE IT EMPTY FOR NOW
+var attacks = [];
 
 
+// look down on the blobs from above
 camera.position.z = 50;
 
 
@@ -256,11 +307,11 @@ function onDocumentMouseMove(event) {
 function onClick(event){
 
   r.setFromCamera( mouse, camera );
-  var intersects = r.intersectObjects( mainBlobGroup.children );
+  var intersects = r.intersectObjects( mainSpheres );
 
   console.log(intersects);
 
-  if(intersects.length === 0 && selected !== undefined){
+  if(intersects.length === 0 && selected !== undefined ){
     selected.material.color.sub(colorSEL);
     selected = undefined;
   } 
@@ -268,20 +319,40 @@ function onClick(event){
 
     for( var i = 0; i < intersects.length; i++ ) {
       var obj = intersects[ i ].object;
+
       if (selected !== undefined){
+        if (selected.name === obj.name){
+          continue;
+        }
         selected.material.color.sub(colorSEL);
 
-        selected = undefined;
-        attacks[0].add(new Mesh(geometry, materialRED));
-        attacks[0].children[0].scale.set(
-          fillBlobs[0].getSphere().scale.x * .75,
-          fillBlobs[0].getSphere().scale.y * .75,
-          fillBlobs[0].getSphere().scale.z * .75 )
-        attacks[0].children[0].position.set(
-          fillBlobs[0].getSphere().position.x,
-          fillBlobs[0].getSphere().position.y,
-          fillBlobs[0].getSphere().position.z);
 
+        //name, size, position, move, grow, geometry, material, opacity, parent
+
+        // make the target the parent so that way we can tell when its has struck
+        // dont need to know the original blob for anything other than color position and
+        // scale which we can initialize the attack blob with
+
+        // maybe coming up with a naming convention for attack would be useful, need to figure out concatenation in js
+
+        for(var i=0; i<fillBlobs.length; i++){
+          if(fillBlobs[i].getSphere().name.slice(4,5) === selected.name.slice(4,5)){
+            var tempFill = fillBlobs[i].getSphere();
+            break;
+          }
+        }
+
+        var t = tempFill.scale;
+        var p = tempFill.position;
+        var mr = (obj.position.x - p.x) / (obj.position.y - p.y);
+        console.log(1/mr*.01);
+
+        attacks.push(new Blob("", new Vector3(t.x*.75, t.y*.75, t.z*.75), new Vector3(p.x, p.y, p.z), new Vector2(.03*mr,.03*(1/mr)), 
+  new Vector3(0,0,0), geometry, selected.material, false, intersects[i].object));
+
+        scene.add(attacks[attacks.length-1].getSphere());
+
+        selected = undefined;
 
 
       }
@@ -331,16 +402,10 @@ function render(dt) {
   }
 
 
-
-  if(attacks[0].children.length !== 0){
-    attacks[0].children[0].position.x += .2;
-    attacks[0].children[0].position.y += .2;
-
+  for (var i=0; i<attacks.length; i++) {
+    attacks[i].updatePos()
   }
 
-
-  // camera.rotation.x += .01;
-  // camera.rotation.y += .01;
 
   // sphere_fill.scale.set(sphere_fill.radius*1.01,sphere_fill.radius*1.01,sphere_fill.radius*1.01);
 
