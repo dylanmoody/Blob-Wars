@@ -3,7 +3,7 @@ let {
   Mesh
 } = require('three');
 let {
-  coloRED, 
+  colorRED, 
   colorGRAY, 
   colorBLUE, 
   colorGRAY_fill, 
@@ -39,7 +39,7 @@ class Attack extends Object3D {
   }
 
   getSize() {
-    return this.sphere.scale.x;
+    return this.sphere.scale;
   }
 
   getColor() {

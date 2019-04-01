@@ -256,6 +256,7 @@ function onResize() {
 function onDocumentMouseMove(event) {
   event.preventDefault();
 
+
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -320,15 +321,15 @@ function onClick(event){
 }
 
 function aiMove(scene) {
-  const AICOLOR = 'red';
-  const OPPONENTCOLOR = 'blue';
-  const NEUTRALCOLOR = 'gray';
+  // const AICOLOR = 'red';
+  // const OPPONENTCOLOR = 'blue';
+  // const NEUTRALCOLOR = 'gray';
 
 
-  let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR);
-  let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === OPPONENTCOLOR);
-  let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
-  console.log(aiBlobs, opponentBlobs, neutralBlobs);
+  // let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR);
+  // let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === OPPONENTCOLOR);
+  // let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
+  // console.log(aiBlobs, opponentBlobs, neutralBlobs);
   
 
 
