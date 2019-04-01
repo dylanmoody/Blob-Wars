@@ -405,7 +405,7 @@ function render(dt) {
     if(child.update) child.update(t)
   }
 
-  if (ai % 1 === 0) {
+  if (ai % 300 === 0) {
     aiMove(scene);
   }
   ai++;
