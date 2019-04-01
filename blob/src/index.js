@@ -62,7 +62,7 @@ const bloomPass = new BloomPass();
 const fxaaPass = new FXAAPass();
 const r = new Raycaster();
 var mouse = new Vector2(0.5, 0.5)
-  INTERSECTED;
+
 
 /* Main scene and camera */
 const scene = new Scene();
