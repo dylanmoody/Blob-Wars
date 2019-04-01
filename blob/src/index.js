@@ -14,7 +14,6 @@ let {
   Group,
   Color,
   Object3D
-<<<<<<< HEAD
 } = require('three');
 let Blob = require("./objects/Blob.js");
 let Attack = require("./objects/Attack.js");
@@ -86,129 +85,6 @@ window.menuButton = menuButton
 
 
 */
-
-
-<<<<<<< HEAD
-let d = new Date();
-=======
-class Blob extends Object3D {
-  constructor(name, size, p, grow, geometry, material, fill_mat) {
-    super()
-    this.grow = grow;
-
-
-    this.sphere = new Mesh(geometry, material.clone());
-    this.add(this.sphere)
-    this.sphere.name = name;
-    this.sphere.scale.set(size.x, size.y, size.z);
-    this.sphere.position.set(p.x, p.y, p.z);
-
-
-
-    this.fill = new Mesh(geometry, fill_mat.clone());
-
-    let fs = size.multiplyScalar(0.1);
-    this.fill.scale.set(fs.x, fs.y,fs.z);
-    this.fill.position.set(p.x, p.y, p.z);
-
-    this.sphere.material.transparent = true;
-    this.sphere.material.opacity = .8;  
-
-
-  }
-
-  setChild(child){
-    this.sphere.children.push(child);
-  }
-
-  getSphere() {
-    return this.sphere;
-  }
-
-  getFill() {
-    return this.fill
-  }
-
-  updateScale(t) {
-    //change the 5 to actually access the parent size
-    if (this.fill.scale.x < 5 * 0.92) {
-      this.fill.scale.set(
-        this.fill.scale.x + this.grow.x,
-        this.fill.scale.y + this.grow.y,
-        this.fill.scale.z + this.grow.z
-      );
-    }
-
-  }
-
-  dealDamage(attackingOrb) {
-
-  }
-}
-
-
-class Attack extends Object3D {
-
-  constructor(name, geometry, material, scale, start, end, duration, targetObject) {
-    super()
-    this.sphere = new Mesh(geometry, material.clone());
-    this.add(this.sphere);
-    this.sphere.name = name;
-    this.sphere.scale.set(scale.x, scale.y, scale.z);
-    this.sphere.position.set(start.x, start.y, start.z);
-
-    this.s = start;
-    this.e = end
-    
-    this.duration = duration;
-
-    let d = new Date();
-    this.startTime = d.getTime();
-    this.targetObject = targetObject;
-  }
-
-  setChild(child){
-    this.sphere.children.push(child);
-  }
-
-  getSphere() {
-    return this.sphere;
-  }
-
-  updatePos(t) {
-
-    var s = this.s;
-    var e = this.e;
-    var dt = t - this.startTime;
-    var iif = dt / (this.duration);
-    var iiif = (1 - iif);
-
-    if(dt > this.duration) {
-      switch(this.targetObject.material.name) {
-        case "red":
-          // code block
-          
-          console.log(this.targetObject.material.name);
-          break;
-        case "blue":
-          // code block
-          break;
-        case "gray":
-          // cs
-          break;
-        default:
-          console.log("oh no");
-          // code block
-      } 
-      return;
-    }
-    
-
-    this.sphere.position.set(s.x * iiif + e.x * iif, s.y * iiif + e.y * iif, s.z * iiif +  s.z * iif);
-  }
-}
-
->>>>>>> 06ee7432cd10198a7564898eb69ab10354e74600
 
 /* Init renderer and canvas */
 const container = document.body;
