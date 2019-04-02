@@ -57,6 +57,12 @@ class Blob extends Object3D {
     return this.fill
   }
 
+  shrink() {
+    this.fill.scale.set(
+      this.fill.scale.x * .15,
+      this.fill.scale.y * .15,
+      this.fill.scale.z * .15);
+  }
 
 
   dealDamage(attackBlob) {

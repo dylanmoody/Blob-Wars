@@ -66,23 +66,45 @@ let stage = {
 /* Custom settings */
 const SETTINGS = {
   useComposer: false,
-  pause: false,
+  pause: true,
 };
 function playButton() {
-  // alert('hi');
-  console.log(document.getElementById("TitleMenu").classList)
-  document.getElementById("TitleMenu").classList.add("hidden")
-  document.getElementById("PlayMenu").classList.remove('hidden')
+  document.getElementById("TitleMenu").classList.add("hidden");
+  document.getElementById("PlayMenu").classList.remove('hidden');
+  SETTINGS.pause = false;
+  if(stage.red.length + stage.blue.length + stage.gray.length > mainBlobs.length){
+    // CREATE NEUTRAL BLOBS (only if play button was pressed for first time)
+    for (var i=0; i<stage.gray.length; i++){
+      s = stage.gray[i].size;
+      var blob = new Blob("main"+stage.red.length+stage.blue.length+i, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
+        new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
+      mainBlobs.push(blob);
+      scene.add(blob);
+      scene.add(blob.getFill())
+}
+  }
 }
 window.playButton = playButton
 
 function menuButton() {
-  console.log("sup")
-  document.getElementById("PlayMenu").classList.add("hidden")
-  document.getElementById("TitleMenu").classList.remove('hidden')
+  document.getElementById("PlayMenu").classList.add("hidden");
+  document.getElementById("TitleMenu").classList.remove('hidden');
+  SETTINGS.pause = true;
 }
 window.menuButton = menuButton
 
+function showWinMessage(message) {
+  var h1 = document.createElement("H1");
+  h1.classList.add("ui", "title", "center");
+  var text = document.createTextNode(message);
+  h1.appendChild(text);
+  document.getElementById("PlayMenu").classList.add("hidden");
+  document.getElementById("TitleMenu").classList.add('hidden');
+  document.getElementById("WinMenu").classList.remove("hidden");
+
+  document.getElementById("WinMenu").appendChild(h1);
+
+}
 
 
 
@@ -197,20 +219,11 @@ for (var i=0; i<stage.blue.length; i++){
   mainBlobs.push(blob);
 }
 
-// CREATE NEUTRAL BLOBS
-for (var i=0; i<stage.gray.length; i++){
-  s = stage.gray[i].size;
-  var blob = new Blob("main"+stage.red.length+stage.blue.length+i, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
-    new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
-  mainBlobs.push(blob);
-}
 
 
 // this is necessary so that we can call intersect on all of them (for selection)
 // might also use it for checking if the attack blobs are intersecting with main blobs
-var mainSpheres = [];
 for (var i=0; i<mainBlobs.length; i++){
-  mainSpheres.push(mainBlobs[i]);
   scene.add(mainBlobs[i]);
   scene.add(mainBlobs[i].getFill())
 }
@@ -241,6 +254,7 @@ document.addEventListener("mousemove", onDocumentMouseMove, false);
 
 document.addEventListener("click", onClick, false);
 
+
 /* -------------------------------------------------------------------------------- */
 
 /**
@@ -252,6 +266,7 @@ function onResize() {
   renderer.setSize(resize.width, resize.height);
   composer.setSize(resize.width, resize.height);
 }
+
 
 
 
@@ -305,6 +320,7 @@ function onClick(event){
         attacks.push(attack);
 
         scene.add(attack);
+        selected.parent.shrink();
 
         selected = undefined;
 
@@ -352,8 +368,10 @@ let aiMove = (scene) => {
 
 
   let attack = new Attack("", geometry, aiTarget.getSphere().material, aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
-  
+  aiTarget.shrink();
+
   scene.add(attack);
+
 }
 
 function winCondition(scene) {
@@ -365,15 +383,6 @@ function winCondition(scene) {
   return 0;
 }
 
-function showWinMessage(message) {
-  var h1 = document.createElement("H1");
-  h1.classList.add("ui", "title", "center");
-  var text = document.createTextNode(message);
-  h1.appendChild(text);
-
-  document.getElementById("TitleMenu").appendChild(h1);
-
-}
 
 
 /**
@@ -384,6 +393,7 @@ function render(dt) {
   
 
 
+  renderer.render(scene, camera);
   if (SETTINGS.pause) return;
 
   let wincond = winCondition(scene);
@@ -397,6 +407,7 @@ function render(dt) {
     SETTINGS.pause = true;
     return;
   }
+
   d = new Date();
   let t = d.getTime();
 
@@ -405,11 +416,10 @@ function render(dt) {
     if(child.update) child.update(t)
   }
 
-  if (ai % 300 === 0) {
+  if (ai % 200 === 0) {
     aiMove(scene);
   }
   ai++;
 
   
-  renderer.render(scene, camera);
 }
