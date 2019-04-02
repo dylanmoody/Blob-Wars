@@ -34,19 +34,6 @@ let resize = require("brindille-resize");
 let OrbitControls = require("./controls/OrbitControls");
 let { gui } = require("./utils/debug");
 
-// let stage = {
-//     blue: {x:0.1, y:0.5, health: 100},
-//     red: {x:0.9, y:0.5, health: 100},
-//     blobs: [
-//         {x: -60,y: -25},
-//         {x: 60,y: 25},
-//         {x: 30,y: 10},
-//         {x: -30,y: 10},
-//         {x: 30,y: -10},
-//         {x: -30,y: -10},
-//     ]
-// }
-
 let stage = {
   blue: [
     {x: -60,y: -25, size: 7},
@@ -107,18 +94,6 @@ function showWinMessage(message) {
 }
 
 
-
-/*
-  
-  creating class to store the spheres here for now for convenience
-  move it later
-  
-  I also dont remember what we decided on storing inside it, so mostly temporary for now
-
-
-
-*/
-
 /* Init renderer and canvas */
 const container = document.body;
 const renderer = new WebGLRenderer({ antialias: true });
@@ -137,19 +112,6 @@ var mouse = new Vector2(0.5, 0.5)
 
 /* Main scene and camera */
 const scene = new Scene();
-// const camera = new PerspectiveCamera(
-//   50,
-//   resize.width / resize.height,
-//   0.1,
-//   1000
-// );
-// const controls = new OrbitControls(camera, {
-//   enablePan: false,
-//   element: renderer.domElement,
-//   parent: renderer.domElement,
-//   distance: 10,
-//   phi: Math.PI * 0.5
-// });
 
 var selected;
 var sceneSize = 100;
@@ -170,31 +132,18 @@ backLight.position.x = -20;
 backLight.position.y = -1;
 backLight.position.z = -1;
 
-/* Actual content of the scene */
-
-
-
+// Actual content of the scene 
 var directionalLight = new DirectionalLight( 0xffffff, 1.5 );
 directionalLight.position.set(0,0,1);
 scene.add( directionalLight );
-// scene.add( light );
 
-/*
-
-  Define Materials 
-
-*/
-
-
+//  Define Materials 
 var materialRED = new MeshLambertMaterial({color:colorRED});
 var materialRED_fill = new MeshStandardMaterial({color:colorRED_fill});
 var materialBLUE = new MeshLambertMaterial({color:colorBLUE});
 var materialBLUE_fill = new MeshStandardMaterial({color:colorBLUE_fill});
 var materialGRAY = new MeshLambertMaterial({color:colorGRAY});
 var materialGRAY_fill = new MeshLambertMaterial({color:colorGRAY_fill});
-
-
-
 
 
 var geometry = new SphereGeometry(0, 32, 32);
@@ -228,9 +177,7 @@ for (var i=0; i<mainBlobs.length; i++){
   scene.add(mainBlobs[i].getFill())
 }
 
-
-
-// CREATE ARRAY OF ATTACKING BLOBS BUT LEAVE IT EMPTY FOR NOW
+// CREATE ARRAY OF ATTACKING BLOBS 
 var attacks = [];
 
 
@@ -240,26 +187,27 @@ camera.position.z = 50;
 
 /* Various event listeners */
 resize.addListener(onResize);
+document.addEventListener("mousemove", onDocumentMouseMove, false);
+document.addEventListener("click", onClick, false);
+
 
 /* create and launch main loop */
 const engine = loop(render);
 engine.start();
 
-/* some stuff with gui */
+/* create gui components */
 gui.add(SETTINGS, "useComposer");
 gui.add(SETTINGS, "pause");
 gui.add(SETTINGS, "resetGrid");
 
-document.addEventListener("mousemove", onDocumentMouseMove, false);
-
-document.addEventListener("click", onClick, false);
-
+// create constants for player color reference
+const AICOLOR = 'red';
+const OPPONENTCOLOR = 'blue';
+const NEUTRALCOLOR = 'gray';
 
 /* -------------------------------------------------------------------------------- */
 
-/**
-  Resize canvas
-*/
+//  Resize canvas
 function onResize() {
   camera.aspect = resize.width / resize.height;
   // camera.updateProjectionMatrix();
@@ -267,9 +215,7 @@ function onResize() {
   composer.setSize(resize.width, resize.height);
 }
 
-
-
-
+// keep track of where the mouse is
 function onDocumentMouseMove(event) {
   event.preventDefault();
 
@@ -279,6 +225,8 @@ function onDocumentMouseMove(event) {
 
 }
 
+// when the user clicks we need to know where and decide if they are trying to attack or select
+// one of their own blobs
 function onClick(event){
 
   r.setFromCamera( mouse, camera );
@@ -338,10 +286,8 @@ function onClick(event){
 
 }
 
-const AICOLOR = 'red';
-const OPPONENTCOLOR = 'blue';
-const NEUTRALCOLOR = 'gray';
 
+// have the execute an attack
 let aiMove = (scene) => {
   let dist = (v1, v2) => {
     return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) + Math.pow(v1.z - v2.z, 2));
@@ -374,6 +320,7 @@ let aiMove = (scene) => {
 
 }
 
+// check if anyone has won the game
 function winCondition(scene) {
   let blobs = scene.children.filter(o => o instanceof Blob)
   let playerWinCondition = blobs.reduce((r, o) => r && o.color === OPPONENTCOLOR, true)
@@ -385,9 +332,7 @@ function winCondition(scene) {
 
 
 
-/**
-  Render loop
-*/
+// Render loop
 let ai = 0;
 function render(dt) {
   
