@@ -217,6 +217,7 @@ var geometry = new SphereGeometry(0, 32, 32);
 // ADD MAIN BLOBS 
 var mainBlobs = [];
 var s;
+
 let count = 0;
 // CREATE RED BLOBS
 for (var i=0; i<stage.red.length; i++){
@@ -260,8 +261,7 @@ var attacks = [];
 
 /* Various event listeners */
 resize.addListener(onResize);
-document.addEventListener("mousemove", onDocumentMouseMove, false);
-document.addEventListener("click", onClick, false);
+document.addEventListener("mousedown", onClick, false);
 
 
 /* create and launch main loop */
@@ -274,7 +274,7 @@ gui.add(SETTINGS, "pause");
 gui.add(SETTINGS, "resetGrid");
 
 // create constants for player color reference
-const AICOLOR = 'red';
+const AICOLOR = ['red', 'green'];
 const PLAYERCOLOR = 'blue';
 const NEUTRALCOLOR = 'gray';
 
@@ -288,19 +288,19 @@ function onResize() {
   composer.setSize(resize.width, resize.height);
 }
 
-// keep track of where the mouse is
-function onDocumentMouseMove(event) {
+
+// when the user clicks we need to know where and decide if they are trying to attack or select
+// one of their own blobs
+function onClick(event){
+
+  if(SETTINGS.pause){
+    return;
+  }
   event.preventDefault();
 
 
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-}
-
-// when the user clicks we need to know where and decide if they are trying to attack or select
-// one of their own blobs
-function onClick(event){
 
   r.setFromCamera( mouse, camera );
   var intersects = r.intersectObjects( mainBlobs.map(b => b.children[0]) );
@@ -357,20 +357,30 @@ let aiMove = (scene) => {
   }
 
 
-  let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR);
+  let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR[colorIndex]);
   let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === PLAYERCOLOR);
   let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
 
 
-  let aiTarget = aiBlobs[Math.floor(Math.random() * aiBlobs.length)]
+  let aiTarget = aiBlobs[Math.floor(Math.random() * aiBlobs.length)];
   let target;
-  if(neutralBlobs.length === 0) {
-    target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)]
+
+  if(neutralBlobs.length !== 0) {
+    target = neutralBlobs[Math.floor(Math.random() * neutralBlobs.length)];
+  } else if (opponentBlobs.length !== 0) {
+    target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
   } else {
-    target = neutralBlobs[Math.floor(Math.random() * neutralBlobs.length)]
+    opponentBlobs = scene.children.filter(o => o instanceof Blob  && o.color !== PLAYERCOLOR 
+                                                                  && o.color !== NEUTRALCOLOR
+                                                                  && o.color !== AICOLOR[colorIndex]);
+
+    target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
   }
 
   if(!target) return;
+
+  colorIndex++;
+  if(colorIndex >= AICOLOR.length) colorIndex = 0;
 
 
   let di = dist(aiTarget.getFill().position, target.getFill().position);
@@ -384,19 +394,23 @@ let aiMove = (scene) => {
 }
 
 // check if anyone has won the game
+var ai = 0;
+var colorIndex = 0;
 function winCondition(scene) {
   let blobs = scene.children.filter(o => o instanceof Blob)
-  let playerWinCondition = blobs.reduce((r, o) => r && o.color === PLAYERCOLOR, true)
-  let aiWinCondition = blobs.reduce((r, o) => r && o.color === AICOLOR, true);
-  if (playerWinCondition) return 1;
-  if (aiWinCondition) return -1;
-  return 0;
+  let color0 = blobs[0].color;
+  let gameOver = blobs.reduce((r, o) => r && o.color === color0, true)
+
+  if (gameOver){
+    showWinMessage(color0 + " wins");
+    SETTINGS.pause = true;
+  }
+
+  return gameOver;
 }
 
 
 
-// Render loop
-let ai = 0;
 function render(dt) {
   
 
@@ -404,15 +418,7 @@ function render(dt) {
   renderer.render(scene, camera);
   if (SETTINGS.pause) return;
 
-  let wincond = winCondition(scene);
-  if(wincond > 0) {
-    showWinMessage("yay you win");
-    SETTINGS.pause = true;
-    return;
-  }
-  if(wincond < 0){ 
-    showWinMessage('ai wins');
-    SETTINGS.pause = true;
+  if(winCondition(scene)) {
     return;
   }
 
@@ -424,7 +430,7 @@ function render(dt) {
     if(child.update) child.update(t)
   }
 
-  if (ai % 300 === 0) {
+  if (ai % 150 === 0) {
     aiMove(scene);
   }
   ai++;
