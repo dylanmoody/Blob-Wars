@@ -17,11 +17,13 @@ let {
 } = require('three');
 let {
   colorRED, 
-  colorGRAY, 
+  colorGREEN,
   colorBLUE, 
-  colorGRAY_fill, 
-  colorBLUE_fill, 
+  colorGRAY,  
   colorRED_fill,
+  colorGREEN_fill,
+  colorBLUE_fill,
+  colorGRAY_fill, 
   colorSEL
 } = require("./colors.js");
 let Blob = require("./objects/Blob.js");
@@ -34,19 +36,75 @@ let resize = require("brindille-resize");
 let OrbitControls = require("./controls/OrbitControls");
 let { gui } = require("./utils/debug");
 
-let stage = {
-  blue: [
-    {x: -60,y: -25, size: 7},
-  ],
-  red: [
-    {x: 60,y: 25, size: 7},
-  ],
-  gray: [
-    {x: 30,y: 10, size: 3},
-    {x: -30,y: 10, size: 3},
-    {x: 30,y: -10, size: 3},
-    {x: -30,y: -10, size: 3},
-  ]
+let stage = {}
+
+switch(Math.floor(Math.random() * 3)) {
+  case 0:
+    stage = {
+      blue: [
+        {x: -60,y: -25, size: 7},
+      ],
+      red: [
+        {x: 60,y: 25, size: 7},
+      ],
+      green: [
+      ],
+      gray: [
+        {x: 30,y: 10, size: 3},
+        {x: -30,y: 10, size: 3},
+        {x: 30,y: -10, size: 3},
+        {x: -30,y: -10, size: 3},
+      ]
+    }
+    break;
+  case 1:
+    stage = {
+      blue: [
+        {x: -20,y: 0, size: 10},
+      ],
+      red: [
+        {x: 20,y: 0, size: 10},
+      ],
+      green: [
+      ],
+      gray: [
+        {x: 60,y: -33, size: 3},
+        {x: 75,y: -20, size: 4},
+        {x: 86,y: 0, size: 5},
+        {x: 75,y: 20, size: 4},
+        {x: 60,y: 33, size: 3},
+
+        {x: -60,y: -33, size: 3},
+        {x: -75,y: -20, size: 4},
+        {x: -86,y: 0, size: 5},
+        {x: -75,y: 20, size: 4},
+        {x: -60,y: 33, size: 3},
+      ] 
+    }
+    break;
+  case 2:
+    stage = {
+      blue: [
+        {x: 0,y: 0, size: 17},
+        {x: 0,y: -40, size: 5},
+        {x: 0,y: 40, size: 5},
+      ],
+      red: [
+        {x: -60,y: 0, size: 5},
+        {x: -30,y: -20, size: 5},
+        {x: -30,y: 20, size: 5},
+      ],
+      green: [
+        {x: 30,y: -20, size: 5},
+        {x: 30,y: 20, size: 5},
+        {x: 60,y: 0, size: 5},
+      ],
+      gray: [
+      ] 
+    }
+    break;
+
+
 }
 
 
@@ -63,11 +121,12 @@ function playButton() {
     // CREATE NEUTRAL BLOBS (only if play button was pressed for first time)
     for (var i=0; i<stage.gray.length; i++){
       s = stage.gray[i].size;
-      var blob = new Blob("main"+stage.red.length+stage.blue.length+i, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
+      var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
         new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
       mainBlobs.push(blob);
       scene.add(blob);
       scene.add(blob.getFill())
+      count++;
 }
   }
 }
@@ -125,12 +184,13 @@ const frontLight = new PointLight(0xffffff, 1);
 const backLight = new PointLight(0xffffff, 0.5);
 scene.add(frontLight);
 scene.add(backLight);
-frontLight.position.x = 20;
+frontLight.position.x = 0;
+frontLight.position.y = 0;
 frontLight.position.z = 15;
-frontLight.position.y = 10;
-backLight.position.x = -20;
-backLight.position.y = -1;
-backLight.position.z = -1;
+
+backLight.position.x = 0;
+backLight.position.y = 0;
+backLight.position.z = -15;
 
 // Actual content of the scene 
 var directionalLight = new DirectionalLight( 0xffffff, 1.5 );
@@ -139,9 +199,11 @@ scene.add( directionalLight );
 
 //  Define Materials 
 var materialRED = new MeshLambertMaterial({color:colorRED});
-var materialRED_fill = new MeshStandardMaterial({color:colorRED_fill});
+var materialRED_fill = new MeshLambertMaterial({color:colorRED_fill});
+var materialGREEN = new MeshLambertMaterial({color:colorGREEN});
+var materialGREEN_fill = new MeshLambertMaterial({color:colorGREEN_fill});
 var materialBLUE = new MeshLambertMaterial({color:colorBLUE});
-var materialBLUE_fill = new MeshStandardMaterial({color:colorBLUE_fill});
+var materialBLUE_fill = new MeshLambertMaterial({color:colorBLUE_fill});
 var materialGRAY = new MeshLambertMaterial({color:colorGRAY});
 var materialGRAY_fill = new MeshLambertMaterial({color:colorGRAY_fill});
 
@@ -151,24 +213,35 @@ var geometry = new SphereGeometry(0, 32, 32);
 // ADD MAIN BLOBS 
 var mainBlobs = [];
 var s;
-
-// CREATE BLUE BLOBS
+let count = 0;
+// CREATE RED BLOBS
 for (var i=0; i<stage.red.length; i++){
   s = stage.red[i].size;
-  var blob = new Blob("main"+i, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0), new Vector3(.004,.004,.004), 
-    geometry, materialRED, materialRED_fill, "red");
+  var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0),
+   new Vector3(.004,.004,.004), geometry, materialRED, materialRED_fill, "red");
   mainBlobs.push(blob);
+  count++;
 }
 
-// CREATE RED BLOBS
+
+// CREATE GREEN BLOBS
+for (var i=0; i<stage.green.length; i++){
+  s = stage.green[i].size;
+  var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.green[i].x,stage.green[i].y,0), 
+    new Vector3(.004,.004,.004), geometry, materialGREEN, materialGREEN_fill, "green");
+  mainBlobs.push(blob);
+  count++;
+}
+
+
+// CREATE BLUE BLOBS
 for (var i=0; i<stage.blue.length; i++){
   s = stage.blue[i].size;
-  var blob = new Blob("main"+stage.red.length+i, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
+  var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
     new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill, "blue");
   mainBlobs.push(blob);
+  count++;
 }
-
-
 
 // this is necessary so that we can call intersect on all of them (for selection)
 // might also use it for checking if the attack blobs are intersecting with main blobs
@@ -202,7 +275,7 @@ gui.add(SETTINGS, "resetGrid");
 
 // create constants for player color reference
 const AICOLOR = 'red';
-const OPPONENTCOLOR = 'blue';
+const PLAYERCOLOR = 'blue';
 const NEUTRALCOLOR = 'gray';
 
 /* -------------------------------------------------------------------------------- */
@@ -295,7 +368,7 @@ let aiMove = (scene) => {
 
 
   let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR);
-  let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === OPPONENTCOLOR);
+  let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === PLAYERCOLOR);
   let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
 
 
@@ -323,7 +396,7 @@ let aiMove = (scene) => {
 // check if anyone has won the game
 function winCondition(scene) {
   let blobs = scene.children.filter(o => o instanceof Blob)
-  let playerWinCondition = blobs.reduce((r, o) => r && o.color === OPPONENTCOLOR, true)
+  let playerWinCondition = blobs.reduce((r, o) => r && o.color === PLAYERCOLOR, true)
   let aiWinCondition = blobs.reduce((r, o) => r && o.color === AICOLOR, true);
   if (playerWinCondition) return 1;
   if (aiWinCondition) return -1;
