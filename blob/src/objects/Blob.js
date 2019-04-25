@@ -70,21 +70,16 @@ class Blob extends Object3D {
 
     if(attackBlob.getColor() === this.color){
       this.fill.scale.set(
-        this.fill.scale.x + s.x,
-        this.fill.scale.y + s.y,
-        this.fill.scale.z + s.z
+        Math.min(this.fill.scale.x + s.x, .9 * this.sphere.scale.x),
+        Math.min(this.fill.scale.y + s.y, .9 * this.sphere.scale.y),
+        Math.min(this.fill.scale.z + s.z, .9 * this.sphere.scale.z)
         ); 
-      if(this.fill.scale.x > .9 * this.sphere.scale.x){
-        this.fill.scale.set(
-          .9 * this.sphere.scale.x,
-          .9 * this.sphere.scale.y,
-          .9 * this.sphere.scale.z
-          ); 
-      }
     }
     else {
       if(this.fill.scale.x - s.x < 0 ){
-        this.fill.scale.set(.1*this.sphere.scale.x, .1*this.sphere.scale.y, .1*this.sphere.scale.z );
+        this.fill.scale.set(Math.min(.1*this.sphere.scale.x + -1*(this.fill.scale.x - s.x), .9 * this.sphere.scale.x ), 
+                            Math.min(.1*this.sphere.scale.y + -1*(this.fill.scale.y - s.y), .9 * this.sphere.scale.y ), 
+                            Math.min(.1*this.sphere.scale.z + -1*(this.fill.scale.z - s.z), .9 * this.sphere.scale.z )  );
         if(attackBlob.getColor() === "red"){
           this.sphere.material.color.set(colorRED);
           this.fill.material.color.set(colorRED_fill)
