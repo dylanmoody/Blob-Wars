@@ -91,12 +91,12 @@ switch(Math.floor(Math.random() * 3)) {
       ],
       red: [
         {x: -60,y: 0, size: 5},
-        {x: -30,y: -20, size: 5},
-        {x: -30,y: 20, size: 5},
+        {x: -35,y: -25, size: 5},
+        {x: -35,y: 25, size: 5},
       ],
       green: [
-        {x: 30,y: -20, size: 5},
-        {x: 30,y: 20, size: 5},
+        {x: 35,y: -25, size: 5},
+        {x: 35,y: 25, size: 5},
         {x: 60,y: 0, size: 5},
       ],
       gray: [
@@ -178,6 +178,10 @@ var aspectRatio = window.innerWidth/window.innerHeight;
 var h = sceneSize;
 var w = sceneSize * aspectRatio;
 const camera = new OrthographicCamera( w/-2, w/2, h/2, h/-2, 0.1, 1000 );
+// look down on the blobs from above
+camera.position.z = 50;
+
+
 
 /* Lights */
 const frontLight = new PointLight(0xffffff, 1);
@@ -254,10 +258,6 @@ for (var i=0; i<mainBlobs.length; i++){
 var attacks = [];
 
 
-// look down on the blobs from above
-camera.position.z = 50;
-
-
 /* Various event listeners */
 resize.addListener(onResize);
 document.addEventListener("mousemove", onDocumentMouseMove, false);
@@ -330,33 +330,23 @@ function onClick(event){
 
         // maybe coming up with a naming convention for attack would be useful, need to figure out concatenation in js
         var tempFill = selected.parent.getFill();
-
         var end = obj
-
         var dist = Math.sqrt(Math.pow(selected.position.x - end.position.x,2) + Math.pow(selected.position.y - end.position.y,2));
-
-
         let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end, selected.parent.getColor());
 
         attacks.push(attack);
-
         scene.add(attack);
         selected.parent.shrink();
-
         selected = undefined;
-
-
       }
       else if (obj.parent.color === 'blue'){
         selected = obj;
 
         obj.material.color.add(colorSEL);
-
       }
+
     }
-
   }
-
 }
 
 
