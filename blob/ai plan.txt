@@ -14,10 +14,10 @@ first of all, is there an attack coming to me?
 					yes - attack lowest health blob on another team.
 					no - return.
 
-am I full?
-	yes - are any of my allies low?
-			yes - attack ally.
-			no - attack lowest enemy.
+am I at the threshold to attack?
+	yes - are there any neutral blobs?
+		yes - attack the lowest one.
+		no - attack players then attack other ai.
 
 can I take over any blobs?
 	*consider distance from current blob to account for growing?*
