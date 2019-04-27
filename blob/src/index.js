@@ -107,6 +107,25 @@ switch(Math.floor(Math.random() * 3)) {
 
 }
 
+    stage = {
+      blue: [
+        {x: 0,y: 0, size: 17},
+        {x: 0,y: -40, size: 5},
+        {x: 0,y: 40, size: 5},
+      ],
+      red: [
+        {x: -60,y: 0, size: 5},
+        {x: -35,y: -25, size: 5},
+        {x: -35,y: 25, size: 5},
+      ],
+      green: [
+        {x: 35,y: -25, size: 5},
+        {x: 35,y: 25, size: 5},
+        {x: 60,y: 0, size: 5},
+      ],
+      gray: [
+      ] 
+    }
 
 /* Custom settings */
 const SETTINGS = {
@@ -255,9 +274,6 @@ for (var i=0; i<mainBlobs.length; i++){
   scene.add(mainBlobs[i].getFill())
 }
 
-// CREATE ARRAY OF ATTACKING BLOBS 
-var attacks = [];
-
 
 /* Various event listeners */
 resize.addListener(onResize);
@@ -334,12 +350,11 @@ function onClick(event){
         var dist = Math.sqrt(Math.pow(selected.position.x - end.position.x,2) + Math.pow(selected.position.y - end.position.y,2));
         let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end, selected.parent.getColor());
 
-        attacks.push(attack);
         scene.add(attack);
         selected.parent.shrink();
         selected = undefined;
       }
-      else if (obj.parent.color === 'blue'){
+      else if (obj.parent.color === PLAYERCOLOR){
         selected = obj;
 
         obj.material.color.add(colorSEL);
@@ -348,13 +363,12 @@ function onClick(event){
     }
   }
 }
-
+function dist(v1, v2) {
+    return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) + Math.pow(v1.z - v2.z, 2));
+}
 
 // have the execute an attack
-let aiMove = (scene) => {
-  let dist = (v1, v2) => {
-    return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) + Math.pow(v1.z - v2.z, 2));
-  }
+let aiRandMove = (scene) => {
 
 
   let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR[colorIndex]);
@@ -370,9 +384,7 @@ let aiMove = (scene) => {
   } else if (opponentBlobs.length !== 0) {
     target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
   } else {
-    opponentBlobs = scene.children.filter(o => o instanceof Blob  && o.color !== PLAYERCOLOR 
-                                                                  && o.color !== NEUTRALCOLOR
-                                                                  && o.color !== AICOLOR[colorIndex]);
+    opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== AICOLOR[colorIndex]);
 
     target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
   }
@@ -395,6 +407,8 @@ let aiMove = (scene) => {
 
 // check if anyone has won the game
 var ai = 0;
+var ai_num = 0;
+var ai_list = [];
 var colorIndex = 0;
 function winCondition(scene) {
   let blobs = scene.children.filter(o => o instanceof Blob)
@@ -425,15 +439,39 @@ function render(dt) {
   d = new Date();
   let t = d.getTime();
 
+  // for moving blobs
   for(var i = 0; i < scene.children.length; i++) {
     let child = scene.children[i];
     if(child.update) child.update(t)
   }
 
-  if (ai % 150 === 0) {
-    aiMove(scene);
+  // for the ai
+  if (ai === ai_num) {
+    ai_list = scene.children.filter(o => o instanceof Blob  && o.color !== PLAYERCOLOR && o.color !== NEUTRALCOLOR);
+    ai_num = ai_list.length;
+    ai = 0;
+  } else {
+    let attack = ai_list[ai].aiMove(scene);
+    if (attack){      
+      let aiTarget = ai_list[ai];
+      opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor() 
+                                                                   && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
+      if (opponentBlobs.length < 1){
+        opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
+      }
+      var target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
+
+
+      let di = dist(aiTarget.getFill().position, target.getFill().position);
+
+
+      let a = new Attack("", geometry, aiTarget.getSphere().material, aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
+      scene.add(a);
+      aiTarget.shrink();
+
+    }
+    ai++;   
   }
-  ai++;
 
   
 }

@@ -9,7 +9,7 @@ regardless of what you choose the following behavior should be ensured by the fu
 
 first of all, is there an attack coming to me?
 	yes - how far away is it?
-			far - continue.
+			far - return.
 			close - deadly?
 					yes - attack lowest health blob on another team.
 					no - return.

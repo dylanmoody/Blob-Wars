@@ -12,12 +12,14 @@ let {
   colorRED_fill,
   colorSEL
 } = require("../colors.js");
+let Attack = require("./Attack.js");
 class Blob extends Object3D {
   constructor(name, size, p, grow, geometry, material, fill_mat, color) {
     super()
     this.grow = grow;
     this.color = color;
-
+    this.name = name;
+    this.geometry = geometry;
 
     this.sphere = new Mesh(geometry, material.clone());
     this.add(this.sphere)
@@ -98,7 +100,6 @@ class Blob extends Object3D {
   }
 
   update(t) {
-    //change the 5 to actually access the parent size
     if (this.fill.scale.x < this.sphere.scale.x * 0.9) {
       this.fill.scale.set(
         this.fill.scale.x + this.grow.x,
@@ -108,6 +109,42 @@ class Blob extends Object3D {
     }
 
   }
+
+  aiMove(scene) {
+    let dist = (v1, v2) => {
+      return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) );
+    }
+    let attackers = [];
+    let opponentBlobs = [];
+    let attack = false;
+
+
+    attackers = scene.children.filter(o => o instanceof Attack && o.getColor() !== this.color && o.getEnd() === this.fill.position );
+    if (attackers.length > 0){
+      for(let i=0; i<attackers.length; i++) {
+
+        if( attackers[i].sphere.scale.x < this.fill.scale.x ) {
+          return attack;
+        }
+
+        if( dist(attackers[i].sphere.position, this.sphere.position) < 7 ) {
+          attack = true;
+        }
+      }
+    } else if(this.fill.scale.x > .35*this.sphere.scale.x) {
+      attack = true;
+    } else {
+      opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== this.color 
+                                                                   && o.sphere.scale.x < this.sphere.scale.x);
+      if (opponentBlobs.length > 0) {
+        attack = true;
+      }
+
+    }
+
+    return attack;
+  }
+
 }
 
 module.exports = Blob

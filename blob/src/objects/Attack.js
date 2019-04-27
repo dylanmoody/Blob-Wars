@@ -38,6 +38,10 @@ class Attack extends Object3D {
     return this.sphere;
   }
 
+  getEnd() {
+    return this.e;
+  }
+
   getSize() {
     return this.sphere.scale;
   }
