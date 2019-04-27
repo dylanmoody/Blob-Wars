@@ -107,25 +107,6 @@ switch(Math.floor(Math.random() * 3)) {
 
 }
 
-    stage = {
-      blue: [
-        {x: 0,y: 0, size: 17},
-        {x: 0,y: -40, size: 5},
-        {x: 0,y: 40, size: 5},
-      ],
-      red: [
-        {x: -60,y: 0, size: 5},
-        {x: -35,y: -25, size: 5},
-        {x: -35,y: 25, size: 5},
-      ],
-      green: [
-        {x: 35,y: -25, size: 5},
-        {x: 35,y: 25, size: 5},
-        {x: 60,y: 0, size: 5},
-      ],
-      gray: [
-      ] 
-    }
 
 /* Custom settings */
 const SETTINGS = {
@@ -454,16 +435,17 @@ function render(dt) {
     let attack = ai_list[ai].aiMove(scene);
     if (attack){      
       let aiTarget = ai_list[ai];
-      opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor() 
+      opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
                                                                    && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
-      var target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
+      console.log(opponentBlobs);
+      opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
+      var target = opponentBlobs[0];
 
 
       let di = dist(aiTarget.getFill().position, target.getFill().position);
-
 
       let a = new Attack("", geometry, aiTarget.getSphere().material, aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
       scene.add(a);

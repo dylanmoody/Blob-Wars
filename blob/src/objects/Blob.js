@@ -12,6 +12,7 @@ let {
   colorRED_fill,
   colorSEL
 } = require("../colors.js");
+
 let Attack = require("./Attack.js");
 class Blob extends Object3D {
   constructor(name, size, p, grow, geometry, material, fill_mat, color) {
@@ -124,19 +125,20 @@ class Blob extends Object3D {
       for(let i=0; i<attackers.length; i++) {
 
         if( attackers[i].sphere.scale.x < this.fill.scale.x ) {
-          return attack;
+          return false;
         }
 
         if( dist(attackers[i].sphere.position, this.sphere.position) < 7 ) {
           attack = true;
         }
       }
-    } else if(this.fill.scale.x > .35*this.sphere.scale.x) {
+    } else if(this.fill.scale.x > .4*this.sphere.scale.x) {
       attack = true;
     } else {
       opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== this.color 
-                                                                   && o.sphere.scale.x < this.sphere.scale.x);
+                                                                   && o.fill.scale.x < this.fill.scale.x);
       if (opponentBlobs.length > 0) {
+        console.log(opponentBlobs[0]);
         attack = true;
       }
 
