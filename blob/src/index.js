@@ -41,6 +41,8 @@ let { gui } = require("./utils/debug");
 let stage = {}
 var ai = 0;
 var ai_num = 0;
+d = new Date();
+var ai_time = d.getTime();
 var mainBlobs = [];
 /* Custom settings */
 const SETTINGS = {
@@ -466,10 +468,16 @@ function render(dt) {
     ai = 0;
   } else {
     let attack = ai_list[ai].aiMove(scene);
+
     if (attack){      
       let aiTarget = ai_list[ai];
-      opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
-                                                                   && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
+      if(Math.random() > .4){
+        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
+                                                                     && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
+      }else {
+        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
+                                                                     && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
+      }
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
@@ -484,7 +492,11 @@ function render(dt) {
       aiTarget.shrink();
 
     }
+  }
+  if(d.getTime() - ai_time > 35){
     ai++;   
+    ai_time = d.getTime();
+
   }
 
   
