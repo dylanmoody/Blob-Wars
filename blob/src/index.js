@@ -481,7 +481,8 @@ function render(dt) {
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
-      opponentBlobs.sort(function(a,b){return b.getFill().scale.x - a.getFill().scale.x});
+      opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
+
       var target = opponentBlobs[0];
 
 
