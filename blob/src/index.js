@@ -400,10 +400,9 @@ function onClick(event){
 
         // maybe coming up with a naming convention for attack would be useful, need to figure out concatenation in js
         var tempFill = selected.parent.getFill();
-        var end = obj
+        var end = obj;
         var dist = Math.sqrt(Math.pow(selected.position.x - end.position.x,2) + Math.pow(selected.position.y - end.position.y,2));
         let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end, selected.parent.getColor());
-
         scene.add(attack);
         selected.parent.shrink();
         selected = undefined;
@@ -466,7 +465,7 @@ function render(dt) {
     ai_num = ai_list.length;
     ai = 0;
   } else {
-    let attack = ai_list[ai].aiMove(scene, SETTINGS.pause);
+    let attack = ai_list[ai].aiMove(scene);
     if (attack){      
       let aiTarget = ai_list[ai];
       opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
@@ -474,7 +473,7 @@ function render(dt) {
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
-      opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
+      opponentBlobs.sort(function(a,b){return b.getFill().scale.x - a.getFill().scale.x});
       var target = opponentBlobs[0];
 
 

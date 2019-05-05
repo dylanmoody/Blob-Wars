@@ -111,7 +111,7 @@ class Blob extends Object3D {
 
   }
 
-  aiMove(scene, pause) {
+  aiMove(scene) {
     let dist = (v1, v2) => {
       return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) );
     }
@@ -120,30 +120,22 @@ class Blob extends Object3D {
     let attack = false;
 
 
-    attackers = scene.children.filter(o => o instanceof Attack && o.getColor() !== this.color && o.getEnd() === this.fill.position );
+    attackers = scene.children.filter(o => o instanceof Attack &&  o.getEnd().x === this.fill.position.x && o.getEnd().y === this.fill.position.y);
     if (attackers.length > 0){
+
       for(let i=0; i<attackers.length; i++) {
 
         if( attackers[i].sphere.scale.x < this.fill.scale.x ) {
           return false;
         }
 
-        if( dist(attackers[i].sphere.position, this.sphere.position) < 7 ) {
+        if( dist(attackers[i].sphere.position, this.sphere.position) < 15 ) {
           attack = true;
         }
       }
     } else if(this.fill.scale.x > .4*this.sphere.scale.x) {
       attack = true;
-    } else {
-      opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== this.color 
-                                                                   && o.fill.scale.x < this.fill.scale.x);
-      if (opponentBlobs.length > 0) {
-        console.log(opponentBlobs[0]);
-        attack = true;
-      }
-
-    }
-
+    } 
     return attack;
   }
 
