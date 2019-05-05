@@ -21,12 +21,12 @@
 
             .ui {
                 position: absolute;
+                transform: translate(50%, -50%);
             }
 
             .title {
                 top:30%; 
                 right:50%; 
-                transform: translate(50%, -50%);
                 color:white;
                 font-family: bevan;
                 font-size: 60px;
@@ -47,18 +47,30 @@
                 background: rgba(255,255,255,.3);
 
             }
-
-            .main{
-                top:50%; 
-                right:50%; 
+            .winner {
+                position: absolute;
                 transform: translate(50%, -50%);
+                top:30%; 
+                right:50%; 
+                color:white;
+                font-family: bevan;
+                font-size: 60px;
+                font-style: italic;
+                border: 0;
+                padding:0;
 
             }
 
-            .play{
+            .start{
+                top:50%; 
+                right:50%; 
+
+            }
+
+
+            .pause{
                 top:90%;
                 right:92%;
-                transform: translate(50%, -50%);
             }
             .hidden {
                 visibility: hidden;
@@ -79,19 +91,40 @@
   </script>
   <div id="TitleMenu">
         <h1  class="ui title center">BLOB WARS </h1>
-        <input id='button' class="ui menu main" type="submit" onclick="playButton();" value="PLAY"/>
+        <input id='button' class="ui menu start" type="submit" onclick="button('begin');" value="BEGIN"/>
         
 
     </div>
 
     <div id="PlayMenu" class="hidden">
-        <input id='button' class="ui menu play" type="submit" onclick="menuButton();" value="MENU"/>
+        <input id='button' class="ui menu pause" type="submit" onclick="button('pause');" value="PAUSE"/>
+        
+    </div>
+
+    <div id="levelSelectMenu" class="hidden">
+        <input id='button' class="ui menu" style="top:30%;right:70%; " type="submit" onclick="button('level1');" value="LEVEL 1"/>
+        <input id='button' class="ui menu" style="top:30%;right:50%; " type="submit" onclick="button('level2');" value="LEVEL 2"/>
+        <input id='button' class="ui menu" style="top:30%;right:30%; " type="submit" onclick="button('level3');" value="LEVEL 3"/>
+        
+    </div>
+
+    <div id="levelSelectPlay" class="hidden">
+        <input id='button' class="ui menu" style="bottom:30%;right:50%; " type="submit" onclick="button('play');" value="PLAY"/>
+
+    </div>
+
+    <div id="PauseMenu" class="hidden">
+        <input id='button' class="ui menu" style="top:40%;right:50%;" type="submit" onclick="button('resume');" value="RESUME"/>
+        <input id='button' class="ui menu" style="top:60%;right:50%;" type="submit" onclick="button('restart');" value="RESTART"/>
         
     </div>
 
     <div id="WinMenu" class="hidden">
+        <input id='button' class="ui menu" style="top:60%;right:50%;" type="submit" onclick="button('reset');" value="RESTART"/>
+        <h1 class="winner"> WINNER </h1>
         
     </div>
+
   <script src="index.js"></script>
 </body>
 </html>

@@ -36,119 +36,92 @@ let resize = require("brindille-resize");
 let OrbitControls = require("./controls/OrbitControls");
 let { gui } = require("./utils/debug");
 
+
+
 let stage = {}
-
-switch(Math.floor(Math.random() * 3)) {
-  case 0:
-    stage = {
-      blue: [
-        {x: -60,y: -25, size: 7},
-      ],
-      red: [
-        {x: 60,y: 25, size: 7},
-      ],
-      green: [
-      ],
-      gray: [
-        {x: 30,y: 10, size: 3},
-        {x: -30,y: 10, size: 3},
-        {x: 30,y: -10, size: 3},
-        {x: -30,y: -10, size: 3},
-      ]
-    }
-    break;
-  case 1:
-    stage = {
-      blue: [
-        {x: -20,y: 0, size: 10},
-      ],
-      red: [
-        {x: 20,y: 0, size: 10},
-      ],
-      green: [
-      ],
-      gray: [
-        {x: 60,y: -33, size: 3},
-        {x: 75,y: -20, size: 4},
-        {x: 86,y: 0, size: 5},
-        {x: 75,y: 20, size: 4},
-        {x: 60,y: 33, size: 3},
-
-        {x: -60,y: -33, size: 3},
-        {x: -75,y: -20, size: 4},
-        {x: -86,y: 0, size: 5},
-        {x: -75,y: 20, size: 4},
-        {x: -60,y: 33, size: 3},
-      ] 
-    }
-    break;
-  case 2:
-    stage = {
-      blue: [
-        {x: 0,y: 0, size: 17},
-        {x: 0,y: -40, size: 5},
-        {x: 0,y: 40, size: 5},
-      ],
-      red: [
-        {x: -60,y: 0, size: 5},
-        {x: -35,y: -25, size: 5},
-        {x: -35,y: 25, size: 5},
-      ],
-      green: [
-        {x: 35,y: -25, size: 5},
-        {x: 35,y: 25, size: 5},
-        {x: 60,y: 0, size: 5},
-      ],
-      gray: [
-      ] 
-    }
-    break;
-
-
-}
-
-
+var ai = 0;
+var ai_num = 0;
+var mainBlobs = [];
 /* Custom settings */
 const SETTINGS = {
   useComposer: false,
   pause: true,
 };
-function playButton() {
-  document.getElementById("TitleMenu").classList.add("hidden");
-  document.getElementById("PlayMenu").classList.remove('hidden');
-  SETTINGS.pause = false;
-  if(stage.red.length + stage.blue.length + stage.gray.length > mainBlobs.length){
-    // CREATE NEUTRAL BLOBS (only if play button was pressed for first time)
-    for (var i=0; i<stage.gray.length; i++){
-      s = stage.gray[i].size;
-      var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
-        new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
-      mainBlobs.push(blob);
-      scene.add(blob);
-      scene.add(blob.getFill())
-      count++;
-}
+
+function button(value) {
+
+  switch(value){
+    case "begin":
+      document.getElementById("TitleMenu").classList.add("hidden");
+      document.getElementById("levelSelectMenu").classList.remove('hidden');
+      break;
+
+    case "level1":
+      loadScene(1);
+      document.getElementById("levelSelectPlay").classList.remove("hidden");
+      break;
+
+    case "level2":
+      loadScene(2);
+      document.getElementById("levelSelectPlay").classList.remove("hidden");
+      break;
+
+    case "level3":
+      loadScene(3);
+      document.getElementById("levelSelectPlay").classList.remove("hidden");
+      break;
+
+    case "play":
+      document.getElementById("levelSelectMenu").classList.add('hidden');
+      document.getElementById("levelSelectPlay").classList.add('hidden');
+      document.getElementById("PlayMenu").classList.remove("hidden");
+      SETTINGS.pause = false;
+
+      // this is so that the list of ai blobs gets updated
+      // otherwise switching scenes will have blobs that no longer
+      // exist attacking
+      ai = ai_num;
+      break;
+
+    case "pause":
+      document.getElementById("PlayMenu").classList.add("hidden");
+      document.getElementById("PauseMenu").classList.remove('hidden');
+      SETTINGS.pause = true;
+      break;
+
+    case "resume":
+      document.getElementById("PlayMenu").classList.remove("hidden");
+      document.getElementById("PauseMenu").classList.add('hidden');
+      SETTINGS.pause = false;
+      break;
+
+    case "restart":
+      clearScene();
+      document.getElementById("TitleMenu").classList.remove("hidden");
+      document.getElementById("PauseMenu").classList.add('hidden');
+      break;
+
+    case "reset":
+      clearScene();
+      document.getElementById("TitleMenu").classList.remove("hidden");
+      document.getElementById("WinMenu").classList.add('hidden');
+
+      break;
+
   }
 }
-window.playButton = playButton
-
-function menuButton() {
-  document.getElementById("PlayMenu").classList.add("hidden");
-  document.getElementById("TitleMenu").classList.remove('hidden');
-  SETTINGS.pause = true;
-}
-window.menuButton = menuButton
+window.button = button
 
 function showWinMessage(message) {
   var h1 = document.createElement("H1");
-  h1.classList.add("ui", "title", "center");
+  h1.classList.add("winner");
   var text = document.createTextNode(message);
   h1.appendChild(text);
   document.getElementById("PlayMenu").classList.add("hidden");
   document.getElementById("TitleMenu").classList.add('hidden');
   document.getElementById("WinMenu").classList.remove("hidden");
 
-  document.getElementById("WinMenu").appendChild(h1);
+  document.getElementById("WinMenu").replaceChild(h1, document.getElementsByClassName("winner")[0]);
 
 }
 
@@ -196,10 +169,6 @@ backLight.position.x = 0;
 backLight.position.y = 0;
 backLight.position.z = -15;
 
-// Actual content of the scene 
-var directionalLight = new DirectionalLight( 0xffffff, 1.5 );
-directionalLight.position.set(0,0,1);
-scene.add( directionalLight );
 
 //  Define Materials 
 var materialRED = new MeshLambertMaterial({color:colorRED});
@@ -214,47 +183,151 @@ var materialGRAY_fill = new MeshLambertMaterial({color:colorGRAY_fill});
 
 var geometry = new SphereGeometry(0, 32, 32);
 
-// ADD MAIN BLOBS 
-var mainBlobs = [];
-var s;
 
-let count = 0;
-// CREATE RED BLOBS
-for (var i=0; i<stage.red.length; i++){
-  s = stage.red[i].size;
-  var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0),
-   new Vector3(.004,.004,.004), geometry, materialRED, materialRED_fill, "red");
-  mainBlobs.push(blob);
-  count++;
+function clearScene( ) {
+  //empty the scene
+  while(scene.children.length > 0){ 
+    scene.remove(scene.children[0]); 
+  }
 }
 
 
-// CREATE GREEN BLOBS
-for (var i=0; i<stage.green.length; i++){
-  s = stage.green[i].size;
-  var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.green[i].x,stage.green[i].y,0), 
-    new Vector3(.004,.004,.004), geometry, materialGREEN, materialGREEN_fill, "green");
-  mainBlobs.push(blob);
-  count++;
+function loadScene(stage){
+
+
+
+  switch(stage) {
+    case 1:
+      stage = {
+        blue: [
+          {x: -60,y: -25, size: 7},
+        ],
+        red: [
+          {x: 60,y: 25, size: 7},
+        ],
+        green: [
+        ],
+        gray: [
+          {x: 30,y: 10, size: 3},
+          {x: -30,y: 10, size: 3},
+          {x: 30,y: -10, size: 3},
+          {x: -30,y: -10, size: 3},
+        ]
+      }
+      break;
+    case 2:
+      stage = {
+        blue: [
+          {x: -20,y: 0, size: 10},
+        ],
+        red: [
+          {x: 20,y: 0, size: 10},
+        ],
+        green: [
+        ],
+        gray: [
+          {x: 60,y: -33, size: 3},
+          {x: 75,y: -20, size: 4},
+          {x: 86,y: 0, size: 5},
+          {x: 75,y: 20, size: 4},
+          {x: 60,y: 33, size: 3},
+
+          {x: -60,y: -33, size: 3},
+          {x: -75,y: -20, size: 4},
+          {x: -86,y: 0, size: 5},
+          {x: -75,y: 20, size: 4},
+          {x: -60,y: 33, size: 3},
+        ] 
+      }
+      break;
+    case 3:
+      stage = {
+        blue: [
+          {x: 0,y: 0, size: 17},
+          {x: 0,y: -40, size: 5},
+          {x: 0,y: 40, size: 5},
+        ],
+        red: [
+          {x: -60,y: 0, size: 5},
+          {x: -35,y: -25, size: 5},
+          {x: -35,y: 25, size: 5},
+        ],
+        green: [
+          {x: 35,y: -25, size: 5},
+          {x: 35,y: 25, size: 5},
+          {x: 60,y: 0, size: 5},
+        ],
+        gray: [
+        ] 
+      }
+      break;
+
+
+  }
+
+
+
+  clearScene();
+
+  // Actual content of the scene 
+  var directionalLight = new DirectionalLight( 0xffffff, 1.5 );
+  directionalLight.position.set(0,0,1);
+  scene.add( directionalLight );
+
+  // ADD MAIN BLOBS 
+  mainBlobs = [];
+  let s;
+
+  let count = 0;
+  // CREATE RED BLOBS
+  for (var i=0; i<stage.red.length; i++){
+    s = stage.red[i].size;
+    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0),
+     new Vector3(.004,.004,.004), geometry, materialRED, materialRED_fill, "red");
+    mainBlobs.push(blob);
+    count++;
+  }
+
+
+  // CREATE GREEN BLOBS
+  for (var i=0; i<stage.green.length; i++){
+    s = stage.green[i].size;
+    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.green[i].x,stage.green[i].y,0), 
+      new Vector3(.004,.004,.004), geometry, materialGREEN, materialGREEN_fill, "green");
+    mainBlobs.push(blob);
+    count++;
+  }
+
+
+  // CREATE BLUE BLOBS
+  for (var i=0; i<stage.blue.length; i++){
+    s = stage.blue[i].size;
+    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
+      new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill, "blue");
+    mainBlobs.push(blob);
+    count++;
+  }
+
+
+  // CREATE NEUTRAL BLOBS 
+  for (var i=0; i<stage.gray.length; i++){
+    s = stage.gray[i].size;
+    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
+      new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
+    mainBlobs.push(blob);
+    count++;
+  }
+  
+
+  // this is necessary so that we can call intersect on all of them (for selection)
+  // might also use it for checking if the attack blobs are intersecting with main blobs
+  for (var i=0; i<mainBlobs.length; i++){
+    scene.add(mainBlobs[i]);
+    scene.add(mainBlobs[i].getFill())
+  }
+
+
 }
-
-
-// CREATE BLUE BLOBS
-for (var i=0; i<stage.blue.length; i++){
-  s = stage.blue[i].size;
-  var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
-    new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill, "blue");
-  mainBlobs.push(blob);
-  count++;
-}
-
-// this is necessary so that we can call intersect on all of them (for selection)
-// might also use it for checking if the attack blobs are intersecting with main blobs
-for (var i=0; i<mainBlobs.length; i++){
-  scene.add(mainBlobs[i]);
-  scene.add(mainBlobs[i].getFill())
-}
-
 
 /* Various event listeners */
 resize.addListener(onResize);
@@ -348,47 +421,8 @@ function dist(v1, v2) {
     return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) + Math.pow(v1.z - v2.z, 2));
 }
 
-// have the execute an attack
-let aiRandMove = (scene) => {
-
-
-  let aiBlobs = scene.children.filter(o => o instanceof Blob && o.color === AICOLOR[colorIndex]);
-  let opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color === PLAYERCOLOR);
-  let neutralBlobs = scene.children.filter(o => o instanceof Blob && o.color === NEUTRALCOLOR);
-
-
-  let aiTarget = aiBlobs[Math.floor(Math.random() * aiBlobs.length)];
-  let target;
-
-  if(neutralBlobs.length !== 0) {
-    target = neutralBlobs[Math.floor(Math.random() * neutralBlobs.length)];
-  } else if (opponentBlobs.length !== 0) {
-    target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
-  } else {
-    opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== AICOLOR[colorIndex]);
-
-    target = opponentBlobs[Math.floor(Math.random() * opponentBlobs.length)];
-  }
-
-  if(!target) return;
-
-  colorIndex++;
-  if(colorIndex >= AICOLOR.length) colorIndex = 0;
-
-
-  let di = dist(aiTarget.getFill().position, target.getFill().position);
-
-
-  let attack = new Attack("", geometry, aiTarget.getSphere().material, aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
-  aiTarget.shrink();
-
-  scene.add(attack);
-
-}
 
 // check if anyone has won the game
-var ai = 0;
-var ai_num = 0;
 var ai_list = [];
 var colorIndex = 0;
 function winCondition(scene) {
@@ -432,7 +466,7 @@ function render(dt) {
     ai_num = ai_list.length;
     ai = 0;
   } else {
-    let attack = ai_list[ai].aiMove(scene);
+    let attack = ai_list[ai].aiMove(scene, SETTINGS.pause);
     if (attack){      
       let aiTarget = ai_list[ai];
       opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
@@ -440,7 +474,6 @@ function render(dt) {
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
-      console.log(opponentBlobs);
       opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
       var target = opponentBlobs[0];
 
