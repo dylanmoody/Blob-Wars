@@ -468,7 +468,7 @@ function render(dt) {
 
   // for the ai
   if (ai === ai_num) {
-    ai_list = scene.children.filter(o => o instanceof Blob  && o.color !== NEUTRALCOLOR);
+    ai_list = scene.children.filter(o => o instanceof Blob && o.color !== PLAYERCOLOR  && o.color !== NEUTRALCOLOR);
     ai_num = ai_list.length;
     ai = 0;
   } else {
@@ -477,16 +477,15 @@ function render(dt) {
     if (attack){      
       let aiTarget = ai_list[ai];
       if(Math.random() > .4){
-        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
-                                                                     && o.getFill().scale.x < aiTarget.getFill().scale.x);
+        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() ));
       }else {
-        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
+        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() === aiTarget.getColor() )
                                                                      && o.getFill().scale.x < aiTarget.getFill().scale.x);
       }
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
-      opponentBlobs.sort(function(a,b){return dist(b.getFill().position, a.getFill().position )});
+      opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
 
       var target = opponentBlobs[0];
 
