@@ -120,7 +120,8 @@ class Blob extends Object3D {
     let attack = false;
 
 
-    attackers = scene.children.filter(o => o instanceof Attack &&  o.getEnd().x === this.fill.position.x && o.getEnd().y === this.fill.position.y);
+    attackers = scene.children.filter(o => o instanceof Attack &&  o.getEnd().x === this.fill.position.x && o.getEnd().y === this.fill.position.y
+                                            && o.getColor() !== this.color);
     if (attackers.length > 0){
 
       for(let i=0; i<attackers.length; i++) {
@@ -133,13 +134,13 @@ class Blob extends Object3D {
           attack = true;
         }
       }
+    } else if(this.fill.scale.x > .6*this.sphere.scale.x) {
+      attack = true;
     } else if(this.fill.scale.x > .4*this.sphere.scale.x) {
       if (scene.children.filter(o => o instanceof Blob && o.fill.scale.x < this.fill.scale.x).length > 0){
         attack = true;
 
       }
-    } else if(this.fill.scale.x > .75*this.sphere.scale.x) {
-      attack = true;
     }
     return attack;
   }

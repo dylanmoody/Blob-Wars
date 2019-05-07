@@ -36,6 +36,7 @@ let resize = require("brindille-resize");
 let OrbitControls = require("./controls/OrbitControls");
 let { gui } = require("./utils/debug");
 
+// npm run-script build
 
 
 let stage = {}
@@ -463,7 +464,7 @@ function render(dt) {
 
   // for the ai
   if (ai === ai_num) {
-    ai_list = scene.children.filter(o => o instanceof Blob  && o.color !== PLAYERCOLOR && o.color !== NEUTRALCOLOR);
+    ai_list = scene.children.filter(o => o instanceof Blob  && o.color !== NEUTRALCOLOR);
     ai_num = ai_list.length;
     ai = 0;
   } else {
@@ -473,10 +474,10 @@ function render(dt) {
       let aiTarget = ai_list[ai];
       if(Math.random() > .4){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
-                                                                     && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
+                                                                     && o.getFill().scale.x < aiTarget.getFill().scale.x);
       }else {
         opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() )
-                                                                     && o.getSphere().scale.x < aiTarget.getSphere().scale.x);
+                                                                     && o.getFill().scale.x < aiTarget.getFill().scale.x);
       }
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
