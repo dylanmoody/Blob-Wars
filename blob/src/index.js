@@ -443,6 +443,10 @@ function winCondition(scene) {
 
 
 function render(dt) {
+
+  let dist = (v1, v2) => {
+    return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) );
+  }
   
 
 
@@ -482,7 +486,7 @@ function render(dt) {
       if (opponentBlobs.length < 1){
         opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
       }
-      opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
+      opponentBlobs.sort(function(a,b){return dist(b.getFill().position, a.getFill().position )});
 
       var target = opponentBlobs[0];
 

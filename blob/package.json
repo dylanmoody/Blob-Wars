@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "repository": "superguigui/threejs-starter-kit",
   "scripts": {
-    "start": "budo src/index.js --open --live -- ",
-    "build": "browserify src/index.js  -p tinyify > index.js"
+    "start": "budo src/index.js --open --live -- -t babelify -t glslify",
+    "build": "browserify src/index.js -t babelify -t glslify -p tinyify > index.js"
   },
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
