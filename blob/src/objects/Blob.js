@@ -130,10 +130,12 @@ class Blob extends Object3D {
           if( dist(attackers[i].sphere.position, this.fill.position) < 20 ) {
             return true;
           }
+
           return false;
         } 
       }
-    } else if(this.fill.scale.x > .5*this.sphere.scale.x) {
+    } 
+    if(this.fill.scale.x > .5*this.sphere.scale.x) {
       attack = true;
     } else if(this.fill.scale.x > .3*this.sphere.scale.x) {
       if (scene.children.filter(o => o instanceof Blob && o.fill.scale.x < this.fill.scale.x).length > 0){

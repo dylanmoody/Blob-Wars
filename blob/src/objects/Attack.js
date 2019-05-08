@@ -81,7 +81,7 @@ class Attack extends Object3D {
       return;
     }
     
-    console.log(t);
+
 
     this.sphere.position.set(s.x * iiif + e.x * iif, s.y * iiif + e.y * iif, s.z * iiif +  s.z * iif);
   }

@@ -33,8 +33,6 @@ let WAGNER = require("@superguigui/wagner");
 let BloomPass = require("@superguigui/wagner/src/passes/bloom/MultiPassBloomPass");
 let FXAAPass = require("@superguigui/wagner/src/passes/fxaa/FXAAPass");
 let resize = require("brindille-resize");
-let OrbitControls = require("./controls/OrbitControls");
-let { gui } = require("./utils/debug");
 
 // npm run-script build
 
@@ -52,7 +50,6 @@ var ai_time = d.getTime();
 var mainBlobs = [];
 /* Custom settings */
 const SETTINGS = {
-  useComposer: false,
   pause: true,
 };
 
@@ -235,22 +232,22 @@ function loadScene(stage){
       stage = {
         blue: [
           {x: -20,y: 0, size: 10},
+          {x: 86,y: 0, size: 5, fill: .9},
         ],
         red: [
           {x: 20,y: 0, size: 10},
+          {x: -86,y: 0, size: 5, fill: .9},
         ],
         green: [
         ],
         gray: [
           {x: 60,y: -33, size: 3, fill: .9},
           {x: 75,y: -20, size: 4, fill: .9},
-          {x: 86,y: 0, size: 5, fill: .9},
           {x: 75,y: 20, size: 4, fill: .9},
           {x: 60,y: 33, size: 3, fill: .9},
 
           {x: -60,y: -33, size: 3, fill: .9},
           {x: -75,y: -20, size: 4, fill: .9},
-          {x: -86,y: 0, size: 5, fill: .9},
           {x: -75,y: 20, size: 4, fill: .9},
           {x: -60,y: 33, size: 3, fill: .9},
         ] 
@@ -355,14 +352,10 @@ document.addEventListener("keydown", onKeypress);
 const engine = loop(render);
 engine.start();
 
-/* create gui components */
-gui.add(SETTINGS, "useComposer");
-gui.add(SETTINGS, "pause");
-gui.add(SETTINGS, "resetGrid");
 
 // create constants for player color reference
-const AICOLOR = ["red", "green", "blue"];
-const PLAYERCOLOR = "gray";
+const AICOLOR = ["red", "green"];
+const PLAYERCOLOR = "blue";
 const NEUTRALCOLOR = "gray";
 
 /* -------------------------------------------------------------------------------- */
@@ -506,7 +499,7 @@ function render(dt) {
     ai_num = ai_list.length;
     ai = 0;
   } else {
-    if (ai_list[ai].getColor() !==  PLAYERCOLOR){    
+    if (ai_list.length > 0 && ai_list[ai].getColor() !==  PLAYERCOLOR){    
       let attack = ai_list[ai].aiMove(scene);
 
       if (attack){      
