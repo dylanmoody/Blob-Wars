@@ -7,7 +7,7 @@ let {
   Vector2,
   Vector3,
   DirectionalLight,
-  MeshLambertMaterial,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   SphereGeometry,
   Mesh,
@@ -174,17 +174,18 @@ backLight.position.z = -15;
 
 
 //  Define Materials 
-var materialRED = new MeshLambertMaterial({color:colorRED});
-var materialRED_fill = new MeshLambertMaterial({color:colorRED_fill});
-var materialGREEN = new MeshLambertMaterial({color:colorGREEN});
-var materialGREEN_fill = new MeshLambertMaterial({color:colorGREEN_fill});
-var materialBLUE = new MeshLambertMaterial({color:colorBLUE});
-var materialBLUE_fill = new MeshLambertMaterial({color:colorBLUE_fill});
-var materialGRAY = new MeshLambertMaterial({color:colorGRAY});
-var materialGRAY_fill = new MeshLambertMaterial({color:colorGRAY_fill});
+var materialRED = new MeshBasicMaterial({color:colorRED});
+var materialRED_fill = new MeshBasicMaterial({color:colorRED_fill});
+var materialGREEN = new MeshBasicMaterial({color:colorGREEN});
+var materialGREEN_fill = new MeshBasicMaterial({color:colorGREEN_fill});
+var materialBLUE = new MeshBasicMaterial({color:colorBLUE});
+var materialBLUE_fill = new MeshBasicMaterial({color:colorBLUE_fill});
+var materialGRAY = new MeshBasicMaterial({color:colorGRAY});
+var materialGRAY_fill = new MeshBasicMaterial({color:colorGRAY_fill});
 
 
 var geometry = new SphereGeometry(0, 32, 32);
+var attackAmount = .5;
 
 
 function clearScene( ) {
@@ -335,6 +336,7 @@ function loadScene(stage){
 /* Various event listeners */
 resize.addListener(onResize);
 document.addEventListener("mousedown", onClick, false);
+document.addEventListener("keydown", onKeypress);
 
 
 /* create and launch main loop */
@@ -347,9 +349,9 @@ gui.add(SETTINGS, "pause");
 gui.add(SETTINGS, "resetGrid");
 
 // create constants for player color reference
-const AICOLOR = ['red', 'green'];
-const PLAYERCOLOR = 'blue';
-const NEUTRALCOLOR = 'gray';
+const AICOLOR = ["red", "green"];
+const PLAYERCOLOR = "blue";
+const NEUTRALCOLOR = "gray";
 
 /* -------------------------------------------------------------------------------- */
 
@@ -405,9 +407,12 @@ function onClick(event){
         var tempFill = selected.parent.getFill();
         var end = obj;
         var dist = Math.sqrt(Math.pow(selected.position.x - end.position.x,2) + Math.pow(selected.position.y - end.position.y,2));
-        let attack = new Attack("", geometry, selected.material, tempFill.scale, tempFill.position, end.position, 100*dist, end, selected.parent.getColor());
+
+        let attack = new Attack("", geometry, tempFill.material.clone(), selected.material.clone(), tempFill.scale, tempFill.position, end.position, 100*dist, end, selected.parent.getColor(), attackAmount);
         scene.add(attack);
-        selected.parent.shrink();
+
+        selected.parent.shrink(attackAmount);
+        console.log("hello");
         selected = undefined;
       }
       else if (obj.parent.color === PLAYERCOLOR){
@@ -419,6 +424,26 @@ function onClick(event){
     }
   }
 }
+
+function onKeypress(event) {
+
+  switch(event.key){
+    case("a"):
+      attackAmount = .25;
+      break;
+    case("s"):
+      attackAmount = .5;
+      break;
+    case("d"):
+      attackAmount = .75;
+      break;
+    case("f"):
+      attackAmount = .99;
+      break;
+  }
+}
+
+
 function dist(v1, v2) {
     return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) + Math.pow(v1.z - v2.z, 2));
 }
@@ -472,31 +497,35 @@ function render(dt) {
     ai_num = ai_list.length;
     ai = 0;
   } else {
-    let attack = ai_list[ai].aiMove(scene);
+    if (ai_list[ai].getColor() !==  PLAYERCOLOR){    
+      let attack = ai_list[ai].aiMove(scene);
 
-    if (attack){      
-      let aiTarget = ai_list[ai];
-      if(Math.random() > .4){
-        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() ));
-      }else {
-        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() === aiTarget.getColor() )
-                                                                     && o.getFill().scale.x < aiTarget.getFill().scale.x);
+      if (attack){      
+        let aiTarget = ai_list[ai];
+        if(Math.random() > .4){
+          opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() ));
+        }else {
+          opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() === aiTarget.getColor() )
+                                                                       && o.getFill().scale.x < aiTarget.getFill().scale.x);
+        }
+        if (opponentBlobs.length < 1){
+          opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
+        }
+        opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
+
+        var target = opponentBlobs[0];
+
+
+        let di = dist(aiTarget.getFill().position, target.getFill().position);
+
+        let a = new Attack("", geometry, aiTarget.getFill().material.clone(), aiTarget.getSphere().material.clone(), aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
+        scene.add(a);
+        aiTarget.shrink();
+
       }
-      if (opponentBlobs.length < 1){
-        opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
-      }
-      opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
 
-      var target = opponentBlobs[0];
+    } 
 
-
-      let di = dist(aiTarget.getFill().position, target.getFill().position);
-
-      let a = new Attack("", geometry, aiTarget.getSphere().material, aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
-      scene.add(a);
-      aiTarget.shrink();
-
-    }
   }
   if(d.getTime() - ai_time > 35){
     ai++;   

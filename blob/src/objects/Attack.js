@@ -13,12 +13,14 @@ let {
 } = require("../colors.js");
 class Attack extends Object3D {
 
-  constructor(name, geometry, material, scale, start, end, duration, targetObject, color) {
+  constructor(name, geometry, fillMaterial, material, scale, start, end, duration, targetObject, color, aa) {
     super()
-    this.sphere = new Mesh(geometry, material.clone());
+    this.fillMaterial = fillMaterial.clone();
+    this.material = material.clone();
+    this.sphere = new Mesh(geometry, fillMaterial);
     this.add(this.sphere);
     this.sphere.name = name;
-    this.sphere.scale.set(scale.x, scale.y, scale.z);
+    this.sphere.scale.set(scale.x*aa, scale.y*aa, scale.z*aa);
     this.sphere.position.set(start.x, start.y, start.z);
 
     this.color = color;
@@ -36,6 +38,14 @@ class Attack extends Object3D {
 
   getSphere() {
     return this.sphere;
+  }
+
+  getMaterial() {
+    return this.material;
+  }
+
+  getFillMaterial() {
+    return this.fillMaterial;
   }
 
   getEnd() {

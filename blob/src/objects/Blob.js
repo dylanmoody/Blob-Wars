@@ -60,11 +60,11 @@ class Blob extends Object3D {
     return this.fill
   }
 
-  shrink() {
-    this.fill.scale.set(
-      this.fill.scale.x * .15,
-      this.fill.scale.y * .15,
-      this.fill.scale.z * .15);
+  shrink(amount) {
+    this.fill.scale.set(  this.fill.scale.x * (1-amount), 
+                          this.fill.scale.y * (1-amount),
+                          this.fill.scale.z * (1-amount)     );
+      
   }
 
 
@@ -72,6 +72,7 @@ class Blob extends Object3D {
     var s = attackBlob.getSize();
 
     if(attackBlob.getColor() === this.color){
+      //dont overcap the fill blobs
       this.fill.scale.set(
         Math.min(this.fill.scale.x + s.x, .9 * this.sphere.scale.x),
         Math.min(this.fill.scale.y + s.y, .9 * this.sphere.scale.y),
@@ -79,13 +80,15 @@ class Blob extends Object3D {
         ); 
     }
     else {
+      // add the attack blob power to the negative of the current blob power
       if(this.fill.scale.x - s.x < 0 ){
         this.fill.scale.set(Math.min(-1*(this.fill.scale.x - s.x), .9 * this.sphere.scale.x ), 
                             Math.min(-1*(this.fill.scale.y - s.y), .9 * this.sphere.scale.y ), 
                             Math.min(-1*(this.fill.scale.z - s.z), .9 * this.sphere.scale.z )  );
         
-        this.sphere.material.color.set(attackBlob.getColor());
-        this.fill.material.color.set(attackBlob.getColor())
+
+        this.sphere.material.color.set(attackBlob.getMaterial().clone().color);
+        this.fill.material.color.set(attackBlob.getFillMaterial().clone().color)
         
         this.grow = new Vector3(.002,.002,.002);
         this.color = attackBlob.getColor();
@@ -111,6 +114,7 @@ class Blob extends Object3D {
 
   }
 
+  // decide if the ai should attack
   aiMove(scene) {
     let dist = (v1, v2) => {
       return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) );
