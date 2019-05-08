@@ -42,6 +42,9 @@ let { gui } = require("./utils/debug");
 let stage = {}
 var ai = 0;
 var ai_num = 0;
+var attackAmount = .5;
+var aiAttackAmount = .6;
+var growRatio = .001;
 d = new Date();
 var ai_time = d.getTime();
 var mainBlobs = [];
@@ -185,7 +188,6 @@ var materialGRAY_fill = new MeshBasicMaterial({color:colorGRAY_fill});
 
 
 var geometry = new SphereGeometry(0, 32, 32);
-var attackAmount = .5;
 
 
 function clearScene( ) {
@@ -212,10 +214,10 @@ function loadScene(stage){
         green: [
         ],
         gray: [
-          {x: 30,y: 10, size: 3},
-          {x: -30,y: 10, size: 3},
-          {x: 30,y: -10, size: 3},
-          {x: -30,y: -10, size: 3},
+          {x: 30,y: 10, size: 3, fill: .9},
+          {x: -30,y: 10, size: 3, fill: .9},
+          {x: 30,y: -10, size: 3, fill: .9},
+          {x: -30,y: -10, size: 3, fill: .9},
         ]
       }
       break;
@@ -230,36 +232,36 @@ function loadScene(stage){
         green: [
         ],
         gray: [
-          {x: 60,y: -33, size: 3},
-          {x: 75,y: -20, size: 4},
-          {x: 86,y: 0, size: 5},
-          {x: 75,y: 20, size: 4},
-          {x: 60,y: 33, size: 3},
+          {x: 60,y: -33, size: 3, fill: .9},
+          {x: 75,y: -20, size: 4, fill: .9},
+          {x: 86,y: 0, size: 5, fill: .9},
+          {x: 75,y: 20, size: 4, fill: .9},
+          {x: 60,y: 33, size: 3, fill: .9},
 
-          {x: -60,y: -33, size: 3},
-          {x: -75,y: -20, size: 4},
-          {x: -86,y: 0, size: 5},
-          {x: -75,y: 20, size: 4},
-          {x: -60,y: 33, size: 3},
+          {x: -60,y: -33, size: 3, fill: .9},
+          {x: -75,y: -20, size: 4, fill: .9},
+          {x: -86,y: 0, size: 5, fill: .9},
+          {x: -75,y: 20, size: 4, fill: .9},
+          {x: -60,y: 33, size: 3, fill: .9},
         ] 
       }
       break;
     case 3:
       stage = {
         blue: [
-          {x: 0,y: 0, size: 17},
-          {x: 0,y: -40, size: 5},
-          {x: 0,y: 40, size: 5},
+          {x: 0,y: 0, size: 11},
         ],
         red: [
           {x: -60,y: 0, size: 5},
           {x: -35,y: -25, size: 5},
           {x: -35,y: 25, size: 5},
+          {x: 0,y: -40, size: 5},
         ],
         green: [
           {x: 35,y: -25, size: 5},
           {x: 35,y: 25, size: 5},
           {x: 60,y: 0, size: 5},
+          {x: 0,y: 40, size: 5},
         ],
         gray: [
         ] 
@@ -286,8 +288,8 @@ function loadScene(stage){
   // CREATE RED BLOBS
   for (var i=0; i<stage.red.length; i++){
     s = stage.red[i].size;
-    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.red[i].x,stage.red[i].y,0),
-     new Vector3(.004,.004,.004), geometry, materialRED, materialRED_fill, "red");
+    var blob = new Blob("main"+count, new Vector3(s,s,s), .1, new Vector3(stage.red[i].x,stage.red[i].y,0),
+     growRatio, geometry, materialRED, materialRED_fill, "red");
     mainBlobs.push(blob);
     count++;
   }
@@ -296,8 +298,8 @@ function loadScene(stage){
   // CREATE GREEN BLOBS
   for (var i=0; i<stage.green.length; i++){
     s = stage.green[i].size;
-    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.green[i].x,stage.green[i].y,0), 
-      new Vector3(.004,.004,.004), geometry, materialGREEN, materialGREEN_fill, "green");
+    var blob = new Blob("main"+count, new Vector3(s,s,s), .1, new Vector3(stage.green[i].x,stage.green[i].y,0), 
+      growRatio, geometry, materialGREEN, materialGREEN_fill, "green");
     mainBlobs.push(blob);
     count++;
   }
@@ -306,8 +308,8 @@ function loadScene(stage){
   // CREATE BLUE BLOBS
   for (var i=0; i<stage.blue.length; i++){
     s = stage.blue[i].size;
-    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
-      new Vector3(.004,.004,.004), geometry, materialBLUE, materialBLUE_fill, "blue");
+    var blob = new Blob("main"+count, new Vector3(s,s,s), .1, new Vector3(stage.blue[i].x,stage.blue[i].y,0), 
+      growRatio, geometry, materialBLUE, materialBLUE_fill, "blue");
     mainBlobs.push(blob);
     count++;
   }
@@ -316,8 +318,8 @@ function loadScene(stage){
   // CREATE NEUTRAL BLOBS 
   for (var i=0; i<stage.gray.length; i++){
     s = stage.gray[i].size;
-    var blob = new Blob("main"+count, new Vector3(s,s,s), new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
-      new Vector3(0,0,0), geometry, materialGRAY, materialGRAY_fill, "gray");
+    var blob = new Blob("main"+count, new Vector3(s,s,s), stage.gray[i].fill, new Vector3(stage.gray[i].x,stage.gray[i].y,0), 
+      growRatio, geometry, materialGRAY, materialGRAY_fill, "gray");
     mainBlobs.push(blob);
     count++;
   }
@@ -349,8 +351,8 @@ gui.add(SETTINGS, "pause");
 gui.add(SETTINGS, "resetGrid");
 
 // create constants for player color reference
-const AICOLOR = ["red", "green"];
-const PLAYERCOLOR = "blue";
+const AICOLOR = ["red", "green", "blue"];
+const PLAYERCOLOR = "gray";
 const NEUTRALCOLOR = "gray";
 
 /* -------------------------------------------------------------------------------- */
@@ -415,7 +417,7 @@ function onClick(event){
 
         selected = undefined;
       }
-      else if (obj.parent.color === PLAYERCOLOR){
+      else if (obj.parent.getColor() === PLAYERCOLOR){
         selected = obj;
 
         obj.material.color.add(colorSEL);
@@ -469,10 +471,6 @@ function winCondition(scene) {
 
 function render(dt) {
 
-  let dist = (v1, v2) => {
-    return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2) );
-  }
-  
 
 
   renderer.render(scene, camera);
@@ -502,25 +500,30 @@ function render(dt) {
 
       if (attack){      
         let aiTarget = ai_list[ai];
-        if(Math.random() > .4){
-          opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== aiTarget.getColor() ));
-        }else {
-          opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() === aiTarget.getColor() )
-                                                                       && o.getFill().scale.x < aiTarget.getFill().scale.x);
-        }
-        if (opponentBlobs.length < 1){
-          opponentBlobs = scene.children.filter(o => o instanceof Blob && o.color !== aiTarget.getColor());
-        }
-        opponentBlobs.sort(function(a,b){return a.getFill().scale.x - b.getFill().scale.x});
+        opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() !== ai_list[ai].getColor() ));
+        if(Math.random() < .2) {
+          opponentBlobs = scene.children.filter(o => o instanceof Blob && (o.getColor() === ai_list[ai].getColor() ));
 
-        var target = opponentBlobs[0];
+        }
+
+        opponentBlobs.sort(function(a,b){return a.getFill().scale.x/a.getSphere().scale.x - b.getFill().scale.x/b.getSphere().scale.x });
+
+        let min = opponentBlobs[0].getFill().scale.x
+        let i = 0;
+        for(; i< opponentBlobs.length; i++) {
+          if(opponentBlobs[i].getFill().scale.x > min+2){
+            break;
+          }
+        }
+        var target = opponentBlobs[parseInt(Math.random()*i)];
+
 
 
         let di = dist(aiTarget.getFill().position, target.getFill().position);
 
-        let a = new Attack("", geometry, aiTarget.getFill().material.clone(), aiTarget.getSphere().material.clone(), aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor(), .5);
+        let a = new Attack("", geometry, aiTarget.getFill().material.clone(), aiTarget.getSphere().material.clone(), aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor(), aiAttackAmount);
         scene.add(a);
-        aiTarget.shrink(.5);
+        aiTarget.shrink(aiAttackAmount);
 
       }
 

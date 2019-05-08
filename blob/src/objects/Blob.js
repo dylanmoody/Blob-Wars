@@ -15,9 +15,9 @@ let {
 
 let Attack = require("./Attack.js");
 class Blob extends Object3D {
-  constructor(name, size, p, grow, geometry, material, fill_mat, color) {
+  constructor(name, size, fillSize, p, growRatio, geometry, material, fill_mat, color) {
     super()
-    this.grow = grow;
+    this.grow = growRatio * size.x;
     this.color = color;
     this.name = name;
     this.geometry = geometry;
@@ -31,10 +31,7 @@ class Blob extends Object3D {
 
 
     this.fill = new Mesh(geometry, fill_mat.clone());
-    let fs = size.multiplyScalar(0.9);
-    if(color !== "gray"){
-      let fs = size.multiplyScalar(0.1);
-    }
+    let fs = size.multiplyScalar(fillSize);
     this.fill.scale.set(fs.x, fs.y,fs.z);
     this.fill.position.set(p.x, p.y, p.z);
 
@@ -90,7 +87,6 @@ class Blob extends Object3D {
         this.sphere.material.color.set(attackBlob.getMaterial().clone().color);
         this.fill.material.color.set(attackBlob.getFillMaterial().clone().color)
         
-        this.grow = new Vector3(.002,.002,.002);
         this.color = attackBlob.getColor();
       }
       else {
@@ -104,11 +100,11 @@ class Blob extends Object3D {
   }
 
   update(t) {
-    if (this.fill.scale.x < this.sphere.scale.x * 0.9) {
+    if (this.color !== "gray" && this.fill.scale.x < this.sphere.scale.x * 0.9) {
       this.fill.scale.set(
-        this.fill.scale.x + this.grow.x,
-        this.fill.scale.y + this.grow.y,
-        this.fill.scale.z + this.grow.z
+        this.fill.scale.x + this.grow,
+        this.fill.scale.y + this.grow,
+        this.fill.scale.z + this.grow
       );
     }
 
@@ -130,17 +126,16 @@ class Blob extends Object3D {
 
       for(let i=0; i<attackers.length; i++) {
 
-        if( attackers[i].sphere.scale.x < this.fill.scale.x ) {
+        if( attackers[i].sphere.scale.x > .9*this.fill.scale.x  ) {
+          if( dist(attackers[i].sphere.position, this.fill.position) < 20 ) {
+            return true;
+          }
           return false;
-        }
-
-        if( dist(attackers[i].sphere.position, this.sphere.position) < 20 ) {
-          attack = true;
-        }
+        } 
       }
-    } else if(this.fill.scale.x > .6*this.sphere.scale.x) {
+    } else if(this.fill.scale.x > .5*this.sphere.scale.x) {
       attack = true;
-    } else if(this.fill.scale.x > .4*this.sphere.scale.x) {
+    } else if(this.fill.scale.x > .3*this.sphere.scale.x) {
       if (scene.children.filter(o => o instanceof Blob && o.fill.scale.x < this.fill.scale.x).length > 0){
         attack = true;
 
