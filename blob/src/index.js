@@ -45,6 +45,8 @@ var ai_num = 0;
 var attackAmount = .5;
 var aiAttackAmount = .6;
 var growRatio = .001;
+var totalPauseTime = 0;
+var pausedAt;
 d = new Date();
 var ai_time = d.getTime();
 var mainBlobs = [];
@@ -93,12 +95,20 @@ function button(value) {
       document.getElementById("PlayMenu").classList.add("hidden");
       document.getElementById("PauseMenu").classList.remove('hidden');
       SETTINGS.pause = true;
+      d = new Date();
+      pausedAt = d.getTime();
       break;
 
     case "resume":
       document.getElementById("PlayMenu").classList.remove("hidden");
       document.getElementById("PauseMenu").classList.add('hidden');
       SETTINGS.pause = false;
+      d = new Date();
+      // this is to stop the attacks from teleporting when you pause
+      let attacks = scene.children.filter(o => o instanceof Attack)
+      for (let i =0; i< attacks.length; i++) {
+        attacks[i].addPausedTime(d.getTime() - pausedAt);
+      }
       break;
 
     case "restart":
@@ -360,7 +370,7 @@ const NEUTRALCOLOR = "gray";
 //  Resize canvas
 function onResize() {
   camera.aspect = resize.width / resize.height;
-  // camera.updateProjectionMatrix();
+  camera.updateProjectionMatrix();
   renderer.setSize(resize.width, resize.height);
   composer.setSize(resize.width, resize.height);
 }
@@ -455,9 +465,9 @@ function dist(v1, v2) {
 var ai_list = [];
 var colorIndex = 0;
 function winCondition(scene) {
-  let blobs = scene.children.filter(o => o instanceof Blob)
+  let blobs = scene.children.filter(o => o instanceof Blob);
   let color0 = blobs[0].color;
-  let gameOver = blobs.reduce((r, o) => r && o.color === color0, true)
+  let gameOver = blobs.reduce((r, o) => r && o.color === color0, true);
 
   if (gameOver){
     showWinMessage(color0 + " wins");
@@ -486,7 +496,8 @@ function render(dt) {
   // for moving blobs
   for(var i = 0; i < scene.children.length; i++) {
     let child = scene.children[i];
-    if(child.update) child.update(t)
+
+    if(child.update) child.update(t- totalPauseTime)
   }
 
   // for the ai

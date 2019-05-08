@@ -23,6 +23,8 @@ class Attack extends Object3D {
     this.sphere.scale.set(scale.x*aa, scale.y*aa, scale.z*aa);
     this.sphere.position.set(start.x, start.y, start.z);
 
+    this.totalPausedTime = 0;
+
     this.color = color;
     this.s = start;
     this.e = end
@@ -60,9 +62,13 @@ class Attack extends Object3D {
     return this.color;
   }
 
+  addPausedTime(amount) {
+    this.totalPausedTime += amount;
+  }
+
   update(t) {
     
-
+    t = t - this.totalPausedTime;
     var s = this.s;
     var e = this.e;
     var dt = t - this.startTime;
@@ -75,6 +81,7 @@ class Attack extends Object3D {
       return;
     }
     
+    console.log(t);
 
     this.sphere.position.set(s.x * iiif + e.x * iif, s.y * iiif + e.y * iif, s.z * iiif +  s.z * iif);
   }
