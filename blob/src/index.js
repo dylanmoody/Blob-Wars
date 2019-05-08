@@ -412,7 +412,7 @@ function onClick(event){
         scene.add(attack);
 
         selected.parent.shrink(attackAmount);
-        console.log("hello");
+
         selected = undefined;
       }
       else if (obj.parent.color === PLAYERCOLOR){
@@ -518,9 +518,9 @@ function render(dt) {
 
         let di = dist(aiTarget.getFill().position, target.getFill().position);
 
-        let a = new Attack("", geometry, aiTarget.getFill().material.clone(), aiTarget.getSphere().material.clone(), aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor());
+        let a = new Attack("", geometry, aiTarget.getFill().material.clone(), aiTarget.getSphere().material.clone(), aiTarget.getFill().scale, aiTarget.getFill().position, target.getFill().position, 100*di, target.children[0], aiTarget.getColor(), .5);
         scene.add(a);
-        aiTarget.shrink();
+        aiTarget.shrink(.5);
 
       }
 
